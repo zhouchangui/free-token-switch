@@ -18,6 +18,9 @@ export interface DeepLinkImportRequest {
   icon?: string;
   model?: string;
   notes?: string;
+  providerType?: string;
+  shareMode?: string;
+  requiresModelSelection?: boolean;
   haikuModel?: string;
   sonnetModel?: string;
   opusModel?: string;

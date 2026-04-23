@@ -69,6 +69,15 @@ pub struct DeepLinkImportRequest {
     /// Optional notes/description
     #[serde(skip_serializing_if = "Option::is_none")]
     pub notes: Option<String>,
+    /// Optional provider type marker (for example shared_seller)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub provider_type: Option<String>,
+    /// Optional share mode marker (for example free / paid)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub share_mode: Option<String>,
+    /// Whether import must fetch and choose models before continuing
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub requires_model_selection: Option<bool>,
     /// Optional Haiku model (Claude only, v3.7.1+)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub haiku_model: Option<String>,

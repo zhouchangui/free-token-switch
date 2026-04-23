@@ -117,6 +117,11 @@ fn parse_provider_deeplink(
     // Extract optional fields
     let model = params.get("model").cloned();
     let notes = params.get("notes").cloned();
+    let provider_type = params.get("providerType").cloned();
+    let share_mode = params.get("shareMode").cloned();
+    let requires_model_selection = params
+        .get("requiresModelSelection")
+        .and_then(|v| v.parse::<bool>().ok());
     let haiku_model = params.get("haikuModel").cloned();
     let sonnet_model = params.get("sonnetModel").cloned();
     let opus_model = params.get("opusModel").cloned();
@@ -154,6 +159,9 @@ fn parse_provider_deeplink(
         icon,
         model,
         notes,
+        provider_type,
+        share_mode,
+        requires_model_selection,
         haiku_model,
         sonnet_model,
         opus_model,
@@ -226,6 +234,9 @@ fn parse_prompt_deeplink(
         api_key: None,
         model: None,
         notes: None,
+        provider_type: None,
+        share_mode: None,
+        requires_model_selection: None,
         haiku_model: None,
         sonnet_model: None,
         opus_model: None,
@@ -292,6 +303,9 @@ fn parse_mcp_deeplink(
         api_key: None,
         model: None,
         notes: None,
+        provider_type: None,
+        share_mode: None,
+        requires_model_selection: None,
         haiku_model: None,
         sonnet_model: None,
         opus_model: None,
@@ -347,6 +361,9 @@ fn parse_skill_deeplink(
         api_key: None,
         model: None,
         notes: None,
+        provider_type: None,
+        share_mode: None,
+        requires_model_selection: None,
         haiku_model: None,
         sonnet_model: None,
         opus_model: None,

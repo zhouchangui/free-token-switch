@@ -44,6 +44,19 @@ fn test_parse_deeplink_with_notes() {
 }
 
 #[test]
+fn test_parse_shared_provider_deeplink() {
+    let url = "ccswitch://v1/import?resource=provider&app=claude&name=Shared%20Kimi&homepage=https%3A%2F%2Fwww.kimi.com%2Fcoding%2Fdocs%2F&endpoint=https%3A%2F%2Fdemo.trycloudflare.com&apiKey=token123&model=kimi-for-coding&providerType=shared_seller&shareMode=free&requiresModelSelection=true&enabled=false";
+
+    let request = parse_deeplink_url(url).unwrap();
+
+    assert_eq!(request.provider_type, Some("shared_seller".to_string()));
+    assert_eq!(request.share_mode, Some("free".to_string()));
+    assert_eq!(request.requires_model_selection, Some(true));
+    assert_eq!(request.enabled, Some(false));
+    assert_eq!(request.model, Some("kimi-for-coding".to_string()));
+}
+
+#[test]
 fn test_parse_invalid_scheme() {
     let url = "https://v1/import?resource=provider&app=claude&name=Test";
 
@@ -132,6 +145,9 @@ fn test_build_gemini_provider_with_model() {
         icon: None,
         model: Some("gemini-2.0-flash".to_string()),
         notes: None,
+        provider_type: None,
+        share_mode: None,
+        requires_model_selection: None,
         haiku_model: None,
         sonnet_model: None,
         opus_model: None,
@@ -185,6 +201,9 @@ fn test_build_gemini_provider_without_model() {
         icon: None,
         model: None,
         notes: None,
+        provider_type: None,
+        share_mode: None,
+        requires_model_selection: None,
         haiku_model: None,
         sonnet_model: None,
         opus_model: None,
@@ -233,6 +252,9 @@ fn test_parse_and_merge_config_claude() {
         icon: None,
         model: None,
         notes: None,
+        provider_type: None,
+        share_mode: None,
+        requires_model_selection: None,
         haiku_model: None,
         sonnet_model: None,
         opus_model: None,
@@ -283,6 +305,9 @@ fn test_parse_and_merge_config_url_override() {
         icon: None,
         model: None,
         notes: None,
+        provider_type: None,
+        share_mode: None,
+        requires_model_selection: None,
         haiku_model: None,
         sonnet_model: None,
         opus_model: None,
