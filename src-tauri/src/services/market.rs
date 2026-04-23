@@ -6,7 +6,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::io::AsyncBufReadExt;
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
+use tokio::time::timeout;
 
 /// AI 市场售卖公告
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,6 +32,7 @@ pub struct MarketService {
     client: Client,
     tunnel_process: Arc<RwLock<Option<tokio::process::Child>>>,
     connected: AtomicBool,
+    connect_lock: Mutex<()>,
 }
 
 impl MarketService {
@@ -43,12 +45,17 @@ impl MarketService {
             client,
             tunnel_process: Arc::new(RwLock::new(None)),
             connected: AtomicBool::new(false),
+            connect_lock: Mutex::new(()),
         }
     }
 
     /// 确保已连接到 Nostr 中继器（懒加载，仅在第一次调用时执行）
     async fn ensure_connected(&self) {
-        if self.connected.swap(true, Ordering::SeqCst) {
+        if self.connected.load(Ordering::SeqCst) {
+            return;
+        }
+        let _connect_guard = self.connect_lock.lock().await;
+        if self.connected.load(Ordering::SeqCst) {
             return;
         }
 
@@ -59,6 +66,7 @@ impl MarketService {
             log::error!("添加 Nostr 中继器失败: {e}");
         }
         self.client.connect().await;
+        self.connected.store(true, Ordering::SeqCst);
         log::info!("MarketService 已连接到 Nostr 网络");
     }
 
@@ -67,7 +75,7 @@ impl MarketService {
         // 1. 启动 cloudflared
         let mut child = tokio::process::Command::new("cloudflared")
             .args(["tunnel", "--url", &format!("http://localhost:{}", port)])
-            .stdout(Stdio::piped())
+            .stdout(Stdio::null())
             .stderr(Stdio::piped())
             .spawn()
             .map_err(|e| {
@@ -75,31 +83,47 @@ impl MarketService {
             })?;
 
         // 2. 从 stderr 中读取生成的临时域名
-        let stderr = child.stderr.take().unwrap();
+        let stderr = match child.stderr.take() {
+            Some(stderr) => stderr,
+            None => {
+                stop_and_reap_child(&mut child).await;
+                return Err(anyhow::anyhow!(
+                    "cloudflared 未提供 stderr 输出，无法获取隧道地址。"
+                ));
+            }
+        };
         let mut reader = tokio::io::BufReader::new(stderr);
-        let mut line = String::new();
-        let mut tunnel_url = String::new();
-
-        // 等待输出域名 (通常是 .trycloudflare.com)
-        for _ in 0..100 {
-            line.clear();
-            if reader.read_line(&mut line).await? == 0 {
-                break;
+        let tunnel_url = match timeout(
+            std::time::Duration::from_secs(15),
+            wait_for_tunnel_url(&mut reader),
+        )
+        .await
+        {
+            Ok(Ok(Some(url))) => url,
+            Ok(Ok(None)) => {
+                stop_and_reap_child(&mut child).await;
+                return Err(anyhow::anyhow!(
+                    "未能从 cloudflared 获取域名。请检查是否安装并联网。"
+                ));
             }
-            log::debug!("Cloudflared: {}", line.trim());
-            if let Some(url) = extract_cloudflare_tunnel_url(&line) {
-                tunnel_url = url;
-                break;
+            Ok(Err(e)) => {
+                stop_and_reap_child(&mut child).await;
+                return Err(anyhow::anyhow!("读取 cloudflared 输出失败: {e}"));
             }
-        }
+            Err(_) => {
+                stop_and_reap_child(&mut child).await;
+                return Err(anyhow::anyhow!(
+                    "等待 cloudflared 隧道地址超时（15 秒）。请稍后重试。"
+                ));
+            }
+        };
 
-        if tunnel_url.is_empty() {
-            return Err(anyhow::anyhow!(
-                "未能从 cloudflared 获取域名。请检查是否安装并联网。"
-            ));
+        let mut tunnel_guard = self.tunnel_process.write().await;
+        if let Some(mut previous_child) = tunnel_guard.take() {
+            stop_and_reap_child(&mut previous_child).await;
         }
+        *tunnel_guard = Some(child);
 
-        *self.tunnel_process.write().await = Some(child);
         log::info!("Cloudflare 隧道已启动: {}", tunnel_url);
         Ok(tunnel_url)
     }
@@ -169,9 +193,43 @@ fn extract_cloudflare_tunnel_url(line: &str) -> Option<String> {
     })
 }
 
+async fn wait_for_tunnel_url(
+    reader: &mut (impl tokio::io::AsyncBufRead + Unpin),
+) -> Result<Option<String>> {
+    let mut line = String::new();
+    loop {
+        line.clear();
+        if reader.read_line(&mut line).await? == 0 {
+            return Ok(None);
+        }
+        log::debug!("Cloudflared: {}", line.trim());
+        if let Some(url) = extract_cloudflare_tunnel_url(&line) {
+            return Ok(Some(url));
+        }
+    }
+}
+
+async fn stop_and_reap_child(child: &mut tokio::process::Child) {
+    if matches!(child.try_wait(), Ok(Some(_))) {
+        return;
+    }
+
+    if let Err(e) = child.start_kill() {
+        log::warn!("停止 cloudflared 进程失败: {e}");
+        return;
+    }
+
+    match timeout(std::time::Duration::from_secs(3), child.wait()).await {
+        Ok(Ok(_)) => {}
+        Ok(Err(e)) => log::warn!("等待 cloudflared 进程退出失败: {e}"),
+        Err(_) => log::warn!("等待 cloudflared 进程退出超时"),
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{extract_cloudflare_tunnel_url, MarketService};
+    use super::{extract_cloudflare_tunnel_url, wait_for_tunnel_url, MarketService};
+    use tokio::io::AsyncWriteExt;
 
     #[test]
     fn generate_access_token_returns_non_empty_value() {
@@ -198,5 +256,21 @@ mod tests {
         let line = "INF + https://example.com ready";
         let url = extract_cloudflare_tunnel_url(line);
         assert_eq!(url, None);
+    }
+
+    #[tokio::test]
+    async fn wait_for_tunnel_url_extracts_first_valid_domain() {
+        let (stream_reader, mut stream_writer) = tokio::io::duplex(256);
+        tokio::spawn(async move {
+            let _ = stream_writer
+                .write_all(
+                    b"INF starting tunnel\nINF endpoint https://demo-123.trycloudflare.com ready\n",
+                )
+                .await;
+        });
+
+        let mut reader = tokio::io::BufReader::new(stream_reader);
+        let url = wait_for_tunnel_url(&mut reader).await.unwrap();
+        assert_eq!(url.as_deref(), Some("https://demo-123.trycloudflare.com"));
     }
 }
