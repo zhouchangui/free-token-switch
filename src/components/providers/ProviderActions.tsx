@@ -15,8 +15,10 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { ProviderSellerPopover } from "@/components/providers/ProviderSellerPopover";
 import { cn } from "@/lib/utils";
 import type { AppId } from "@/lib/api";
+import type { ProviderSellerConfig } from "@/types";
 
 interface ProviderActionsProps {
   appId?: AppId;
@@ -43,6 +45,10 @@ interface ProviderActionsProps {
   // OpenClaw: default model
   isDefaultModel?: boolean;
   onSetAsDefault?: () => void;
+  providerId?: string;
+  providerName?: string;
+  sellerConfig?: ProviderSellerConfig;
+  onSaveSellerConfig?: (config: ProviderSellerConfig) => Promise<void> | void;
 }
 
 export function ProviderActions({
@@ -69,6 +75,10 @@ export function ProviderActions({
   // OpenClaw: default model
   isDefaultModel = false,
   onSetAsDefault,
+  providerId,
+  providerName,
+  sellerConfig,
+  onSaveSellerConfig,
 }: ProviderActionsProps) {
   const { t } = useTranslation();
   const iconButtonClass = "h-8 w-8 p-1";
@@ -314,6 +324,15 @@ export function ProviderActions({
         >
           <BarChart3 className="h-4 w-4" />
         </Button>
+
+        {providerId && providerName && onSaveSellerConfig && (
+          <ProviderSellerPopover
+            providerId={providerId}
+            providerName={providerName}
+            sellerConfig={sellerConfig}
+            onSave={onSaveSellerConfig}
+          />
+        )}
 
         {onOpenTerminal && (
           <Button

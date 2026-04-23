@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { providersApi, settingsApi, openclawApi, type AppId } from "@/lib/api";
 import type {
   Provider,
+  ProviderSellerConfig,
   UsageScript,
   OpenClawProviderConfig,
   OpenClawDefaultModel,
@@ -293,6 +294,19 @@ export function useProviderActions(
     [activeApp, queryClient, t],
   );
 
+  const updateSellerConfig = useCallback(
+    async (provider: Provider, sellerConfig: ProviderSellerConfig) => {
+      await updateProvider({
+        ...provider,
+        meta: {
+          ...provider.meta,
+          sellerConfig,
+        },
+      });
+    },
+    [updateProvider],
+  );
+
   // Set provider as default model (OpenClaw only)
   const setAsDefaultModel = useCallback(
     async (provider: Provider) => {
@@ -343,6 +357,7 @@ export function useProviderActions(
     switchProvider,
     deleteProvider,
     saveUsageScript,
+    updateSellerConfig,
     setAsDefaultModel,
     isLoading:
       addProviderMutation.isPending ||

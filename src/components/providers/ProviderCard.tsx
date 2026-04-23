@@ -5,7 +5,7 @@ import type {
   DraggableAttributes,
   DraggableSyntheticListeners,
 } from "@dnd-kit/core";
-import type { Provider } from "@/types";
+import type { Provider, ProviderSellerConfig } from "@/types";
 import type { AppId } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { ProviderActions } from "@/components/providers/ProviderActions";
@@ -58,6 +58,10 @@ interface ProviderCardProps {
   // OpenClaw: default model
   isDefaultModel?: boolean;
   onSetAsDefault?: () => void;
+  onSaveSellerConfig?: (
+    provider: Provider,
+    config: ProviderSellerConfig,
+  ) => Promise<void> | void;
 }
 
 /** 判断是否为官方供应商（无自定义 base URL / API key，直连官方 API） */
@@ -146,6 +150,7 @@ export function ProviderCard({
   // OpenClaw: default model
   isDefaultModel,
   onSetAsDefault,
+  onSaveSellerConfig,
 }: ProviderCardProps) {
   const { t } = useTranslation();
 
@@ -478,6 +483,14 @@ export function ProviderCard({
               // OpenClaw: default model
               isDefaultModel={isDefaultModel}
               onSetAsDefault={onSetAsDefault}
+              providerId={provider.id}
+              providerName={provider.name}
+              sellerConfig={provider.meta?.sellerConfig}
+              onSaveSellerConfig={
+                onSaveSellerConfig
+                  ? (config) => onSaveSellerConfig(provider, config)
+                  : undefined
+              }
             />
           </div>
         </div>
