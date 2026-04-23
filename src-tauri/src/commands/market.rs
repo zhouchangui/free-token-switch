@@ -55,7 +55,6 @@ pub async fn stop_selling_tokens(
     state
         .market_service
         .stop_selling(&providerId)
-        .await
         .map_err(|e| e.to_string())
 }
 

@@ -130,7 +130,7 @@ impl MarketService {
         }
     }
 
-    pub async fn stop_selling(&self, _provider_id: &str) -> Result<bool> {
+    pub fn stop_selling(&self, _provider_id: &str) -> Result<bool> {
         Ok(true)
     }
 
