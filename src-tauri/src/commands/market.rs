@@ -17,14 +17,14 @@ pub async fn start_cloudflare_tunnel(
 #[tauri::command]
 pub async fn start_selling_tokens(
     state: State<'_, AppState>,
-    provider_id: String,
-    model_name: String,
+    #[allow(non_snake_case)] providerId: String,
+    #[allow(non_snake_case)] modelName: String,
     price: u64,
     endpoint: String,
 ) -> Result<String, String> {
     let listing = MarketListing {
-        provider_id,
-        model_name,
+        provider_id: providerId,
+        model_name: modelName,
         price_per_1k_tokens: price,
         endpoint,
         seller_pubkey: "".to_string(), // MarketService will sign it
