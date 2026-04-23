@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { marketApi } from "@/lib/api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 import {
   buildSharedProviderLink,
   ProviderSellerPopover,
@@ -16,6 +17,14 @@ let clipboardWriteTextMock: ReturnType<typeof vi.fn>;
 
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: invokeMock,
+}));
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+  },
 }));
 
 beforeEach(() => {
@@ -130,6 +139,48 @@ describe("ProviderSellerPopover", () => {
     expect(link).toContain("shareMode=free");
     expect(link).toContain("requiresModelSelection=true");
     expect(link).toContain("model=kimi-for-coding");
+  });
+
+  it("shows a toast after copying the share link", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ProviderSellerPopover
+        providerId="provider-1"
+        providerName="Kimi For Coding"
+        sellerConfig={{
+          enabled: true,
+          mode: "free",
+          status: "active_free",
+          endpoint: "https://demo.trycloudflare.com",
+          accessToken: "ccs_sell_token",
+        }}
+        onSave={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /seller/i }));
+    await user.click(screen.getByRole("button", { name: /copy share link/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalled();
+    });
+  });
+
+  it("shows share link button even before endpoint and token are ready", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ProviderSellerPopover
+        providerId="provider-1"
+        providerName="Kimi For Coding"
+        sellerConfig={{ enabled: false, mode: "free", status: "idle" }}
+        onSave={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /seller/i }));
+    expect(screen.getByRole("button", { name: /copy share link/i })).toBeDisabled();
   });
 
   it("enables selling via market api and persists active free seller config", async () => {
@@ -269,5 +320,40 @@ describe("ProviderSellerPopover", () => {
       price: 37,
       endpoint: "https://demo.trycloudflare.com",
     });
+  });
+
+  it("preserves generated endpoint and token when enabling seller fails", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    invokeMock
+      .mockResolvedValueOnce("seller-token")
+      .mockResolvedValueOnce("https://demo.trycloudflare.com")
+      .mockRejectedValueOnce(new Error("publish failed"));
+
+    render(
+      <ProviderSellerPopover
+        providerId="provider-1"
+        providerName="Demo"
+        sellerConfig={{ enabled: false, mode: "free", status: "idle" }}
+        onSave={onSave}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /seller/i }));
+    await user.click(screen.getAllByRole("switch")[0]);
+    await user.click(screen.getByRole("button", { name: /save/i }));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: "error",
+        lastError: "publish failed",
+        endpoint: "https://demo.trycloudflare.com",
+        accessToken: "seller-token",
+      }),
+    );
   });
 });

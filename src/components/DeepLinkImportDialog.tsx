@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { DeepLinkImportRequest, deeplinkApi } from "@/lib/api/deeplink";
 import { fetchModelsForConfig, type FetchedModel } from "@/lib/api/model-fetch";
@@ -56,32 +56,34 @@ export function DeepLinkImportDialog() {
     );
   };
 
+  const openImportRequest = useCallback(
+    async (incoming: DeepLinkImportRequest) => {
+      if (incoming.config || incoming.configUrl) {
+        try {
+          const mergedRequest = await deeplinkApi.mergeDeeplinkConfig(incoming);
+          setRequest(mergedRequest);
+        } catch (error) {
+          console.error("Failed to merge config:", error);
+          toast.error(t("deeplink.configMergeError"), {
+            description: error instanceof Error ? error.message : String(error),
+          });
+          setRequest(incoming);
+        }
+      } else {
+        setRequest(incoming);
+      }
+
+      setIsOpen(true);
+    },
+    [t],
+  );
+
   useEffect(() => {
     // Listen for deep link import events
     const unlistenImport = listen<DeepLinkImportRequest>(
       "deeplink-import",
       async (event) => {
-        // If config is present, merge it to get the complete configuration
-        if (event.payload.config || event.payload.configUrl) {
-          try {
-            const mergedRequest = await deeplinkApi.mergeDeeplinkConfig(
-              event.payload,
-            );
-            setRequest(mergedRequest);
-          } catch (error) {
-            console.error("Failed to merge config:", error);
-            toast.error(t("deeplink.configMergeError"), {
-              description:
-                error instanceof Error ? error.message : String(error),
-            });
-            // Fall back to original request
-            setRequest(event.payload);
-          }
-        } else {
-          setRequest(event.payload);
-        }
-
-        setIsOpen(true);
+        await openImportRequest(event.payload);
       },
     );
 
@@ -97,7 +99,31 @@ export function DeepLinkImportDialog() {
       unlistenImport.then((fn) => fn());
       unlistenError.then((fn) => fn());
     };
-  }, [t]);
+  }, [openImportRequest, t]);
+
+  useEffect(() => {
+    const handlePaste = async (event: ClipboardEvent) => {
+      const text = event.clipboardData?.getData("text")?.trim();
+      if (!text || !text.startsWith("ccswitch://")) {
+        return;
+      }
+
+      event.preventDefault();
+
+      try {
+        const parsed = await deeplinkApi.parseDeeplink(text);
+        await openImportRequest(parsed);
+      } catch (error) {
+        console.error("Failed to parse pasted deep link:", error);
+        toast.error(t("deeplink.parseError"), {
+          description: error instanceof Error ? error.message : String(error),
+        });
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [openImportRequest, t]);
 
   const isSharedProvider = Boolean(
     request &&

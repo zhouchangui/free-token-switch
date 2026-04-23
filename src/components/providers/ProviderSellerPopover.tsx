@@ -3,6 +3,7 @@ import { Copy, Store } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { ProviderSellerConfig } from "@/types";
 import { marketApi } from "@/lib/api";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -114,11 +115,16 @@ export function ProviderSellerPopover({
         })
       : null;
 
-  const copyText = async (value?: string) => {
+  const copyText = async (
+    value: string | undefined,
+    successKey: string,
+    fallbackMessage: string,
+  ) => {
     if (!value || !navigator?.clipboard?.writeText) {
       return;
     }
     await navigator.clipboard.writeText(value);
+    toast.success(t(successKey, { defaultValue: fallbackMessage }));
   };
 
   const handleApplySuggestedPrice = async () => {
@@ -142,6 +148,8 @@ export function ProviderSellerPopover({
 
   const handleSave = async () => {
     setIsSaving(true);
+    let nextAccessToken = draft.accessToken;
+    let nextEndpoint = draft.endpoint;
 
     try {
       if (draft.enabled) {
@@ -149,10 +157,13 @@ export function ProviderSellerPopover({
           draft.accessToken && draft.accessToken.trim()
             ? draft.accessToken
             : await marketApi.generateSellerAccessToken(providerId);
+        nextAccessToken = accessToken;
+
         const endpoint =
           draft.endpoint && draft.endpoint.trim()
             ? draft.endpoint
             : await marketApi.startCloudflareTunnel(SELLER_TUNNEL_PORT);
+        nextEndpoint = endpoint;
         const pricePer1kTokens =
           draft.mode === "free" ? 0 : normalizePrice(draft.pricePer1kTokens);
 
@@ -168,8 +179,8 @@ export function ProviderSellerPopover({
           enabled: true,
           mode: draft.mode === "free" ? "free" : "paid",
           pricePer1kTokens,
-          endpoint,
-          accessToken,
+          endpoint: nextEndpoint,
+          accessToken: nextAccessToken,
           status: draft.mode === "free" ? "active_free" : "active_paid",
           lastPublishedAt: Date.now(),
           lastError: null,
@@ -189,6 +200,8 @@ export function ProviderSellerPopover({
       try {
         await persist({
           ...draft,
+          endpoint: nextEndpoint,
+          accessToken: nextAccessToken,
           status: "error",
           lastError: toErrorMessage(error),
         });
@@ -315,46 +328,64 @@ export function ProviderSellerPopover({
           </Button>
         )}
 
-        {showCopyActions && (
-          <div className="flex flex-col gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="w-full"
-              disabled={!shareLink}
-              onClick={() => void copyText(shareLink ?? undefined)}
-            >
-              <Copy className="h-3.5 w-3.5" />
-              {t("provider.copyShareLink", {
-                defaultValue: "Copy share link",
-              })}
-            </Button>
+        <div className="flex flex-col gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="w-full"
+            disabled={!shareLink}
+            onClick={() =>
+              void copyText(
+                shareLink ?? undefined,
+                "provider.copyShareLinkSuccess",
+                "Share link copied",
+              )
+            }
+          >
+            <Copy className="h-3.5 w-3.5" />
+            {t("provider.copyShareLink", {
+              defaultValue: "Copy share link",
+            })}
+          </Button>
 
+          {showCopyActions && (
             <div className="flex gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="flex-1"
-              onClick={() => void copyText(draft.endpoint)}
-            >
-              <Copy className="h-3.5 w-3.5" />
-              {t("provider.copyEndpoint", { defaultValue: "Copy endpoint" })}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="flex-1"
-              onClick={() => void copyText(draft.accessToken)}
-            >
-              <Copy className="h-3.5 w-3.5" />
-              {t("provider.copyToken", { defaultValue: "Copy token" })}
-            </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={() =>
+                  void copyText(
+                    draft.endpoint,
+                    "provider.copyEndpointSuccess",
+                    "Endpoint copied",
+                  )
+                }
+              >
+                <Copy className="h-3.5 w-3.5" />
+                {t("provider.copyEndpoint", { defaultValue: "Copy endpoint" })}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={() =>
+                  void copyText(
+                    draft.accessToken,
+                    "provider.copyTokenSuccess",
+                    "Token copied",
+                  )
+                }
+              >
+                <Copy className="h-3.5 w-3.5" />
+                {t("provider.copyToken", { defaultValue: "Copy token" })}
+              </Button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <Button
           type="button"
