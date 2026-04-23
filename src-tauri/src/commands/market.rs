@@ -7,7 +7,8 @@ pub async fn start_cloudflare_tunnel(
     state: State<'_, AppState>,
     port: u16,
 ) -> Result<String, String> {
-    state.market_service
+    state
+        .market_service
         .start_tunnel(port)
         .await
         .map_err(|e| e.to_string())
@@ -30,17 +31,17 @@ pub async fn start_selling_tokens(
         timestamp: chrono::Utc::now().timestamp() as u64,
     };
 
-    state.market_service
+    state
+        .market_service
         .start_selling(listing)
         .await
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn find_ai_sellers(
-    state: State<'_, AppState>,
-) -> Result<Vec<MarketListing>, String> {
-    state.market_service
+pub async fn find_ai_sellers(state: State<'_, AppState>) -> Result<Vec<MarketListing>, String> {
+    state
+        .market_service
         .find_sellers()
         .await
         .map_err(|e| e.to_string())

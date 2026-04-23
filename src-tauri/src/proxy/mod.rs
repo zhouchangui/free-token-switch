@@ -27,12 +27,12 @@ pub(crate) mod server;
 pub mod session;
 pub(crate) mod sse;
 pub(crate) mod switch_lock;
-pub mod x402;
 pub mod thinking_budget_rectifier;
 pub mod thinking_optimizer;
 pub mod thinking_rectifier;
 pub(crate) mod types;
 pub mod usage;
+pub mod x402;
 
 // 公开导出给外部使用（commands, services等模块需要）
 #[allow(unused_imports)]

@@ -1,11 +1,11 @@
 use anyhow::Result;
 use nostr_sdk::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use tokio::sync::RwLock;
 use std::process::Stdio;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use tokio::io::AsyncBufReadExt;
+use tokio::sync::RwLock;
 
 /// AI 市场售卖公告
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -62,7 +62,9 @@ impl MarketService {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .map_err(|e| anyhow::anyhow!("无法启动 cloudflared: {}. 请确保已安装 cloudflared。", e))?;
+            .map_err(|e| {
+                anyhow::anyhow!("无法启动 cloudflared: {}. 请确保已安装 cloudflared。", e)
+            })?;
 
         // 2. 从 stderr 中读取生成的临时域名
         let stderr = child.stderr.take().unwrap();
@@ -73,7 +75,9 @@ impl MarketService {
         // 等待输出域名 (通常是 .trycloudflare.com)
         for _ in 0..100 {
             line.clear();
-            if reader.read_line(&mut line).await? == 0 { break; }
+            if reader.read_line(&mut line).await? == 0 {
+                break;
+            }
             log::debug!("Cloudflared: {}", line.trim());
             if let Some(pos) = line.find("https://") {
                 if let Some(end) = line[pos..].find(".trycloudflare.com") {
@@ -84,7 +88,9 @@ impl MarketService {
         }
 
         if tunnel_url.is_empty() {
-            return Err(anyhow::anyhow!("未能从 cloudflared 获取域名。请检查是否安装并联网。"));
+            return Err(anyhow::anyhow!(
+                "未能从 cloudflared 获取域名。请检查是否安装并联网。"
+            ));
         }
 
         *self.tunnel_process.write().await = Some(child);
@@ -107,11 +113,12 @@ impl MarketService {
     /// 搜索市场上的供应商 (买方)
     pub async fn find_sellers(&self) -> Result<Vec<MarketListing>> {
         self.ensure_connected().await;
-        let filter = Filter::new()
-            .kind(Kind::from(31990))
-            .limit(50);
+        let filter = Filter::new().kind(Kind::from(31990)).limit(50);
 
-        let events = self.client.fetch_events(filter, std::time::Duration::from_secs(5)).await?;
+        let events = self
+            .client
+            .fetch_events(filter, std::time::Duration::from_secs(5))
+            .await?;
 
         let mut results = Vec::new();
         for event in events {
