@@ -79,10 +79,10 @@ function Hero() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="text-5xl md:text-7xl lg:text-[80px] font-bold tracking-tighter text-white max-w-5xl leading-[1.05] uppercase"
+        className="text-5xl md:text-7xl lg:text-[90px] font-bold tracking-tighter text-white max-w-5xl leading-[0.95] uppercase"
       >
-        Decentralized <br className="hidden md:block" />
-        <span className="text-gradient-cyber">AI Token Market</span>
+        Free Token <br className="hidden md:block" />
+        <span className="text-gradient-cyber">Switch_P2P</span>
       </motion.h1>
 
       <motion.p
