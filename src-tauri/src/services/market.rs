@@ -2,6 +2,7 @@ use anyhow::Result;
 use nostr_sdk::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tokio::sync::RwLock;
 use std::process::Stdio;
 use tokio::io::AsyncBufReadExt;
@@ -21,34 +22,36 @@ pub struct MarketService {
     keys: Keys,
     client: Client,
     tunnel_process: Arc<RwLock<Option<tokio::process::Child>>>,
+    connected: AtomicBool,
 }
 
 impl MarketService {
     pub fn new() -> Self {
-        // 1. 生成或加载本地密钥 (增加错误兜底)
         let keys = Keys::generate();
         let client = Client::new(keys.clone());
 
-        let service = Self {
+        Self {
             keys,
             client,
             tunnel_process: Arc::new(RwLock::new(None)),
-        };
+            connected: AtomicBool::new(false),
+        }
+    }
 
-        // 2. 后台异步连接，完全不阻塞主进程
-        let client_clone = service.client.clone();
-        tokio::spawn(async move {
-            if let Err(e) = client_clone.add_relay("wss://relay.damus.io").await {
-                log::error!("添加 Nostr 中继器失败: {e}");
-            }
-            if let Err(e) = client_clone.add_relay("wss://nos.lol").await {
-                log::error!("添加 Nostr 中继器失败: {e}");
-            }
-            client_clone.connect().await;
-            log::info!("MarketService 已连接到 Nostr 网络");
-        });
+    /// 确保已连接到 Nostr 中继器（懒加载，仅在第一次调用时执行）
+    async fn ensure_connected(&self) {
+        if self.connected.swap(true, Ordering::SeqCst) {
+            return;
+        }
 
-        service
+        if let Err(e) = self.client.add_relay("wss://relay.damus.io").await {
+            log::error!("添加 Nostr 中继器失败: {e}");
+        }
+        if let Err(e) = self.client.add_relay("wss://nos.lol").await {
+            log::error!("添加 Nostr 中继器失败: {e}");
+        }
+        self.client.connect().await;
+        log::info!("MarketService 已连接到 Nostr 网络");
     }
 
     /// 启动 Cloudflare 隧道 (穿透内网)
@@ -68,7 +71,7 @@ impl MarketService {
         let mut tunnel_url = String::new();
 
         // 等待输出域名 (通常是 .trycloudflare.com)
-        for _ in 0..100 { 
+        for _ in 0..100 {
             line.clear();
             if reader.read_line(&mut line).await? == 0 { break; }
             log::debug!("Cloudflared: {}", line.trim());
@@ -91,6 +94,7 @@ impl MarketService {
 
     /// 发布售卖信息 (卖方)
     pub async fn start_selling(&self, mut listing: MarketListing) -> Result<String> {
+        self.ensure_connected().await;
         listing.seller_pubkey = self.keys.public_key().to_string();
         let content = serde_json::to_string(&listing)?;
         let builder = EventBuilder::new(Kind::from(31990), content);
@@ -102,13 +106,13 @@ impl MarketService {
 
     /// 搜索市场上的供应商 (买方)
     pub async fn find_sellers(&self) -> Result<Vec<MarketListing>> {
+        self.ensure_connected().await;
         let filter = Filter::new()
             .kind(Kind::from(31990))
             .limit(50);
-        
-        // 0.39 uses fetch_events
+
         let events = self.client.fetch_events(filter, std::time::Duration::from_secs(5)).await?;
-        
+
         let mut results = Vec::new();
         for event in events {
             if let Ok(listing) = serde_json::from_str::<MarketListing>(&event.content) {

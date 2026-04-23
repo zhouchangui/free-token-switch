@@ -203,46 +203,14 @@ pub fn run() {
 
     let mut builder = tauri::Builder::default();
 
-    #[cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))]
-    {
-        builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
-            log::info!("=== Single Instance Callback Triggered ===");
-            log::debug!("Args count: {}", args.len());
-            for (i, arg) in args.iter().enumerate() {
-                log::debug!("  arg[{i}]: {}", redact_url_for_log(arg));
-            }
-
-            if crate::lightweight::is_lightweight_mode() {
-                if let Err(e) = crate::lightweight::exit_lightweight_mode(app) {
-                    log::error!("退出轻量模式重建窗口失败: {e}");
-                }
-            }
-
-            // Check for deep link URL in args (mainly for Windows/Linux command line)
-            let mut found_deeplink = false;
-            for arg in &args {
-                if handle_deeplink_url(app, arg, false, "single_instance args") {
-                    found_deeplink = true;
-                    break;
-                }
-            }
-
-            if !found_deeplink {
-                log::info!("ℹ No deep link URL found in args (this is expected on macOS when launched via system)");
-            }
-
-            // Show and focus window regardless
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.unminimize();
-                let _ = window.show();
-                let _ = window.set_focus();
-                #[cfg(target_os = "linux")]
-                {
-                    linux_fix::nudge_main_window(window.clone());
-                }
-            }
-        }));
-    }
+    // NOTE: single-instance temporarily disabled due to zombie processes (PID 7603, 24484)
+    // preventing new instance startup. Re-enable after system reboot.
+    // #[cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))]
+    // {
+    //     builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+    //         ...
+    //     }));
+    // }
 
     let builder = builder
         // 注册 deep-link 插件（处理 macOS AppleEvent 和其他平台的深链接）
