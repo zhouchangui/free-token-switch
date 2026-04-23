@@ -16,13 +16,13 @@ interface ProviderSellerPopoverProps {
   providerId: string;
   providerName: string;
   sellerConfig?: ProviderSellerConfig;
-  onSave: (config: ProviderSellerConfig) => void;
+  onSave: (config: ProviderSellerConfig) => Promise<void> | void;
 }
 
 function toDraft(config?: ProviderSellerConfig): ProviderSellerConfig {
   return {
     enabled: config?.enabled ?? false,
-    mode: config?.mode ?? "free",
+    mode: config?.mode ?? "paid",
     pricePer1kTokens: config?.pricePer1kTokens,
     endpoint: config?.endpoint,
     accessToken: config?.accessToken,
@@ -49,7 +49,7 @@ export function ProviderSellerPopover({
     setDraft(toDraft(sellerConfig));
   }, [open, sellerConfig]);
 
-  const isFreeMode = draft.mode !== "paid";
+  const isFreeMode = draft.mode === "free";
   const showCopyActions =
     draft.status === "active_free" || draft.status === "active_paid";
 
@@ -106,6 +106,11 @@ export function ProviderSellerPopover({
               setDraft((prev) => ({
                 ...prev,
                 mode: checked ? "free" : "paid",
+                pricePer1kTokens: checked
+                  ? 0
+                  : prev.pricePer1kTokens && prev.pricePer1kTokens > 0
+                    ? prev.pricePer1kTokens
+                    : 1,
               }))
             }
           />
@@ -121,7 +126,7 @@ export function ProviderSellerPopover({
             min={0}
             step="0.01"
             disabled={isFreeMode}
-            value={draft.pricePer1kTokens ?? ""}
+            value={isFreeMode ? 0 : (draft.pricePer1kTokens ?? "")}
             onChange={(event) => {
               const value = event.target.value;
               setDraft((prev) => ({
