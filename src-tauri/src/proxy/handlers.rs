@@ -56,6 +56,62 @@ pub async fn get_status(State(state): State<ProxyState>) -> Result<Json<ProxySta
     Ok(Json(status))
 }
 
+/// 获取当前 Claude 共享入口的模型列表
+///
+/// 主要用于 shared provider deeplink 导入前的模型拉取。
+pub async fn handle_models(
+    State(state): State<ProxyState>,
+) -> Result<Json<Value>, ProxyError> {
+    let current_id = state
+        .db
+        .get_current_provider("claude")
+        .map_err(|e| ProxyError::DatabaseError(e.to_string()))?
+        .ok_or(ProxyError::NoProvidersConfigured)?;
+
+    let provider = state
+        .db
+        .get_provider_by_id(&current_id, "claude")
+        .map_err(|e| ProxyError::DatabaseError(e.to_string()))?
+        .ok_or(ProxyError::NoAvailableProvider)?;
+
+    let env = provider
+        .settings_config
+        .get("env")
+        .and_then(|value| value.as_object())
+        .ok_or_else(|| ProxyError::ConfigError("Provider env missing".to_string()))?;
+
+    let base_url = env
+        .get("ANTHROPIC_BASE_URL")
+        .and_then(|value| value.as_str())
+        .ok_or_else(|| ProxyError::ConfigError("ANTHROPIC_BASE_URL missing".to_string()))?;
+
+    let api_key = env
+        .get("ANTHROPIC_AUTH_TOKEN")
+        .and_then(|value| value.as_str())
+        .or_else(|| env.get("ANTHROPIC_API_KEY").and_then(|value| value.as_str()))
+        .ok_or_else(|| ProxyError::ConfigError("Anthropic auth token missing".to_string()))?;
+
+    let models = crate::services::model_fetch::fetch_models(base_url, api_key, false)
+        .await
+        .map_err(ProxyError::ForwardFailed)?;
+
+    let data: Vec<Value> = models
+        .into_iter()
+        .map(|model| {
+            json!({
+                "id": model.id,
+                "object": "model",
+                "owned_by": model.owned_by,
+            })
+        })
+        .collect();
+
+    Ok(Json(json!({
+        "object": "list",
+        "data": data,
+    })))
+}
+
 // ============================================================================
 // Claude API 处理器（包含格式转换逻辑）
 // ============================================================================

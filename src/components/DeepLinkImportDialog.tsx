@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { DeepLinkImportRequest, deeplinkApi } from "@/lib/api/deeplink";
+import { fetchModelsForConfig, type FetchedModel } from "@/lib/api/model-fetch";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PromptConfirmation } from "./deeplink/PromptConfirmation";
 import { McpConfirmation } from "./deeplink/McpConfirmation";
 import { SkillConfirmation } from "./deeplink/SkillConfirmation";
+import { SharedProviderConfirmation } from "./deeplink/SharedProviderConfirmation";
 import { ProviderIcon } from "./ProviderIcon";
 
 interface DeeplinkError {
@@ -29,6 +31,12 @@ export function DeepLinkImportDialog() {
   const [request, setRequest] = useState<DeepLinkImportRequest | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [sharedModels, setSharedModels] = useState<FetchedModel[]>([]);
+  const [selectedSharedModel, setSelectedSharedModel] = useState("");
+  const [isLoadingSharedModels, setIsLoadingSharedModels] = useState(false);
+  const [sharedProviderError, setSharedProviderError] = useState<string | null>(
+    null,
+  );
 
   // 容错判断：MCP 导入结果可能缺少 type 字段
   const isMcpImportResult = (
@@ -91,13 +99,103 @@ export function DeepLinkImportDialog() {
     };
   }, [t]);
 
+  const isSharedProvider = Boolean(
+    request &&
+      (request.resource === "provider" || !request.resource) &&
+      request.providerType === "shared_seller",
+  );
+
+  useEffect(() => {
+    if (!isOpen || !request || !isSharedProvider) {
+      setSharedModels([]);
+      setSelectedSharedModel("");
+      setIsLoadingSharedModels(false);
+      setSharedProviderError(null);
+      return;
+    }
+
+    const endpoint = request.endpoint?.trim();
+    const apiKey = request.apiKey?.trim();
+    if (!endpoint || !apiKey) {
+      setSharedProviderError(
+        t("deeplink.sharedProviderMissingConnection", {
+          defaultValue: "共享 Provider 缺少 endpoint 或 token，无法导入。",
+        }),
+      );
+      setSharedModels([]);
+      setSelectedSharedModel("");
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoadingSharedModels(true);
+    setSharedProviderError(null);
+    setSharedModels([]);
+    setSelectedSharedModel("");
+
+    void fetchModelsForConfig(endpoint, apiKey, false)
+      .then((models) => {
+        if (cancelled) return;
+        if (!models.length) {
+          setSharedProviderError(
+            t("deeplink.sharedProviderModelsFetchFailed", {
+              defaultValue: "共享 Provider 模型列表获取失败，无法导入。",
+            }),
+          );
+          return;
+        }
+
+        setSharedModels(models);
+        const preferred =
+          request.model && models.some((m) => m.id === request.model)
+            ? request.model
+            : "";
+        setSelectedSharedModel(preferred);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        const description =
+          error instanceof Error ? error.message : String(error);
+        const message = t("deeplink.sharedProviderModelsFetchFailed", {
+          defaultValue: "共享 Provider 模型列表获取失败，无法导入。",
+        });
+        setSharedProviderError(message);
+        toast.error(message, { description });
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoadingSharedModels(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, isSharedProvider, request, t]);
+
   const handleImport = async () => {
     if (!request) return;
+    if (isSharedProvider) {
+      if (sharedProviderError) return;
+      if (!selectedSharedModel) {
+        toast.error(
+          t("deeplink.sharedProviderModelRequired", {
+            defaultValue: "请选择一个可用模型后再导入。",
+          }),
+        );
+        return;
+      }
+    }
 
     setIsImporting(true);
 
     try {
-      const result = await deeplinkApi.importFromDeeplink(request);
+      const effectiveRequest =
+        isSharedProvider && selectedSharedModel
+          ? { ...request, model: selectedSharedModel, enabled: false }
+          : request;
+
+      const result = await deeplinkApi.importFromDeeplink(effectiveRequest);
       const refreshMcp = async (summary: {
         importedCount: number;
         importedIds: string[];
@@ -134,11 +232,11 @@ export function DeepLinkImportDialog() {
       if ("type" in result) {
         if (result.type === "provider") {
           await queryClient.invalidateQueries({
-            queryKey: ["providers", request.app],
+            queryKey: ["providers", effectiveRequest.app],
           });
           toast.success(t("deeplink.importSuccess"), {
             description: t("deeplink.importSuccessDescription", {
-              name: request.name,
+              name: effectiveRequest.name,
             }),
             closeButton: true,
           });
@@ -180,11 +278,11 @@ export function DeepLinkImportDialog() {
       } else {
         // Legacy return type (string ID) - assume provider
         await queryClient.invalidateQueries({
-          queryKey: ["providers", request.app],
+          queryKey: ["providers", effectiveRequest.app],
         });
         toast.success(t("deeplink.importSuccess"), {
           description: t("deeplink.importSuccessDescription", {
-            name: request.name,
+            name: effectiveRequest.name,
           }),
           closeButton: true,
         });
@@ -340,8 +438,20 @@ export function DeepLinkImportDialog() {
                 <SkillConfirmation request={request} />
               )}
 
+              {isSharedProvider && (
+                <SharedProviderConfirmation
+                  request={request}
+                  models={sharedModels}
+                  selectedModel={selectedSharedModel}
+                  onSelectModel={setSelectedSharedModel}
+                  isLoading={isLoadingSharedModels}
+                  error={sharedProviderError}
+                />
+              )}
+
               {/* Legacy Provider View */}
-              {(request.resource === "provider" || !request.resource) && (
+              {(request.resource === "provider" || !request.resource) &&
+                !isSharedProvider && (
                 <>
                   {/* Provider Icon - enlarge and center near the top */}
                   {request.icon && (
@@ -718,7 +828,16 @@ export function DeepLinkImportDialog() {
               >
                 {t("common.cancel")}
               </Button>
-              <Button onClick={handleImport} disabled={isImporting}>
+              <Button
+                onClick={handleImport}
+                disabled={
+                  isImporting ||
+                  (isSharedProvider &&
+                    (isLoadingSharedModels ||
+                      !!sharedProviderError ||
+                      !selectedSharedModel))
+                }
+              >
                 {isImporting ? t("deeplink.importing") : t("deeplink.import")}
               </Button>
             </DialogFooter>

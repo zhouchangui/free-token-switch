@@ -236,6 +236,57 @@ fn test_build_gemini_provider_without_model() {
 }
 
 #[test]
+fn test_build_provider_meta_preserves_shared_provider_type() {
+    use super::provider::build_provider_from_request;
+
+    let request = DeepLinkImportRequest {
+        version: "v1".to_string(),
+        resource: "provider".to_string(),
+        app: Some("claude".to_string()),
+        name: Some("Shared Kimi".to_string()),
+        homepage: Some("https://www.kimi.com/coding/docs/".to_string()),
+        endpoint: Some("https://demo.trycloudflare.com".to_string()),
+        api_key: Some("token123".to_string()),
+        icon: Some("kimi".to_string()),
+        model: Some("kimi-for-coding".to_string()),
+        notes: Some("Friendly shared provider".to_string()),
+        provider_type: Some("shared_seller".to_string()),
+        share_mode: Some("free".to_string()),
+        requires_model_selection: Some(true),
+        haiku_model: None,
+        sonnet_model: None,
+        opus_model: None,
+        config: None,
+        config_format: None,
+        config_url: None,
+        apps: None,
+        repo: None,
+        directory: None,
+        branch: None,
+        content: None,
+        description: None,
+        enabled: Some(false),
+        usage_enabled: None,
+        usage_script: None,
+        usage_api_key: None,
+        usage_base_url: None,
+        usage_access_token: None,
+        usage_user_id: None,
+        usage_auto_interval: None,
+    };
+
+    let provider = build_provider_from_request(&AppType::Claude, &request).unwrap();
+
+    assert_eq!(
+        provider
+            .meta
+            .as_ref()
+            .and_then(|meta| meta.provider_type.as_deref()),
+        Some("shared_seller")
+    );
+}
+
+#[test]
 fn test_parse_and_merge_config_claude() {
     // Prepare Base64 encoded Claude config
     let config_json = r#"{"env":{"ANTHROPIC_AUTH_TOKEN":"sk-ant-xxx","ANTHROPIC_BASE_URL":"https://api.anthropic.com/v1","ANTHROPIC_MODEL":"claude-sonnet-4.5"}}"#;

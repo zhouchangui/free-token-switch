@@ -385,7 +385,10 @@ mod tests {
                 .await;
         });
 
-        let url = wait_for_tunnel_url_from_streams(Some(stdout_reader), None)
+        let url = wait_for_tunnel_url_from_streams(
+            Some(stdout_reader),
+            None::<tokio::io::DuplexStream>,
+        )
             .await
             .unwrap();
         assert_eq!(url.as_deref(), Some("https://stdout-123.trycloudflare.com"));

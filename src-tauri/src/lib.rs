@@ -198,6 +198,14 @@ fn macos_tray_icon() -> Option<Image<'static>> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // rustls 0.23 may see multiple crypto backends in this process graph
+    // (for example ring + aws-lc-rs through transitive deps). Install an
+    // explicit process-wide provider up front so outbound TLS clients
+    // (proxy forwarding, websocket relays, etc.) do not panic at first use.
+    if let Err(_existing) = rustls::crypto::ring::default_provider().install_default() {
+        log::debug!("rustls CryptoProvider already installed");
+    }
+
     // 设置 panic hook，在应用崩溃时记录日志到 <app_config_dir>/crash.log（默认 ~/.tokens-buddy/crash.log）
     panic_hook::setup_panic_hook();
 

@@ -183,6 +183,12 @@ fn get_primary_endpoint(request: &DeepLinkImportRequest) -> String {
 
 /// Build provider meta with usage script configuration
 fn build_provider_meta(request: &DeepLinkImportRequest) -> Result<Option<ProviderMeta>, AppError> {
+    let mut meta = ProviderMeta::default();
+
+    if let Some(provider_type) = request.provider_type.clone() {
+        meta.provider_type = Some(provider_type);
+    }
+
     // Check if any usage script fields are provided
     if request.usage_script.is_none()
         && request.usage_enabled.is_none()
@@ -192,7 +198,11 @@ fn build_provider_meta(request: &DeepLinkImportRequest) -> Result<Option<Provide
         && request.usage_user_id.is_none()
         && request.usage_auto_interval.is_none()
     {
-        return Ok(None);
+        return if meta.provider_type.is_some() {
+            Ok(Some(meta))
+        } else {
+            Ok(None)
+        };
     }
 
     // Decode usage script code if provided
@@ -233,10 +243,9 @@ fn build_provider_meta(request: &DeepLinkImportRequest) -> Result<Option<Provide
         coding_plan_provider: None,
     };
 
-    Ok(Some(ProviderMeta {
-        usage_script: Some(usage_script),
-        ..Default::default()
-    }))
+    meta.usage_script = Some(usage_script);
+
+    Ok(Some(meta))
 }
 
 /// Build Claude settings configuration
