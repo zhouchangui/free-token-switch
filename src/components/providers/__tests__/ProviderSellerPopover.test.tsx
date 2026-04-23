@@ -1,54 +1,49 @@
-import type { Provider } from "@/types";
-import { marketApi } from "@/lib/api";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { ProviderSellerPopover } from "@/components/providers/ProviderSellerPopover";
 
-const { invokeMock } = vi.hoisted(() => ({
-  invokeMock: vi.fn(),
-}));
+describe("ProviderSellerPopover", () => {
+  it("disables price input when free mode is enabled", async () => {
+    const user = userEvent.setup();
 
-vi.mock("@tauri-apps/api/core", () => ({
-  invoke: invokeMock,
-}));
+    render(
+      <ProviderSellerPopover
+        providerId="provider-1"
+        providerName="Demo"
+        sellerConfig={{ enabled: false, mode: "free", status: "idle" }}
+        onSave={vi.fn()}
+      />,
+    );
 
-describe("provider seller config typing", () => {
-  it("allows seller config to be stored inside provider meta", () => {
-    const provider: Provider = {
-      id: "provider-1",
-      name: "Seller Demo",
-      settingsConfig: {},
-      meta: {
-        sellerConfig: {
+    await user.click(screen.getByRole("button", { name: /seller/i }));
+    expect(screen.getByLabelText(/price/i)).toBeDisabled();
+  });
+
+  it("shows copy actions after a free seller becomes active", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ProviderSellerPopover
+        providerId="provider-1"
+        providerName="Demo"
+        sellerConfig={{
           enabled: true,
           mode: "free",
           status: "active_free",
           endpoint: "https://demo.trycloudflare.com",
-          accessToken: "seller-token",
-        },
-      },
-    };
+          accessToken: "ccs_sell_demo",
+        }}
+        onSave={vi.fn()}
+      />,
+    );
 
-    expect(provider.meta?.sellerConfig?.status).toBe("active_free");
-  });
-
-  it("exposes market api wrappers from the api barrel", () => {
-    expect(typeof marketApi.startCloudflareTunnel).toBe("function");
-  });
-
-  it("maps pricePer1kTokens to backend price payload field", async () => {
-    invokeMock.mockResolvedValueOnce("ok");
-
-    await marketApi.startSellingTokens({
-      providerId: "provider-1",
-      modelName: "gpt-4o-mini",
-      pricePer1kTokens: 42,
-      endpoint: "https://demo.trycloudflare.com",
-    } as any);
-
-    expect(invokeMock).toHaveBeenCalledWith("start_selling_tokens", {
-      providerId: "provider-1",
-      modelName: "gpt-4o-mini",
-      price: 42,
-      endpoint: "https://demo.trycloudflare.com",
-    });
+    await user.click(screen.getByRole("button", { name: /seller/i }));
+    expect(
+      screen.getByRole("button", { name: /copy endpoint/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /copy token/i }),
+    ).toBeInTheDocument();
   });
 });
