@@ -1,19 +1,29 @@
 <div align="center">
 
-# CC Switch
+# CC Switch (P2P Market Edition)
 
-### The All-in-One Manager for Claude Code, Codex, Gemini CLI, OpenCode & OpenClaw
+### The De-centralized AI Token Marketplace for Claude Code, Codex & Gemini
 
-[![Version](https://img.shields.io/github/v/release/farion1231/cc-switch?color=blue&label=version)](https://github.com/farion1231/cc-switch/releases)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/farion1231/cc-switch/releases)
+[![Fork](https://img.shields.io/badge/forked%20from-farion1231%2Fcc--switch-blue.svg)](https://github.com/farion1231/cc-switch)
+[![Version](https://img.shields.io/github/v/release/zhouchangui/free-token-switch?color=orange&label=version)](https://github.com/zhouchangui/free-token-switch/releases)
 [![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-orange.svg)](https://tauri.app/)
-[![Downloads](https://img.shields.io/github/downloads/farion1231/cc-switch/total)](https://github.com/farion1231/cc-switch/releases/latest)
 
-<a href="https://trendshift.io/repositories/15372" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15372" alt="farion1231%2Fcc-switch | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+English | [中文](README_ZH.md) | [Changelog](CHANGELOG.md)
 
-English | [中文](README_ZH.md) | [日本語](README_JA.md) | [Changelog](CHANGELOG.md)
+---
+
+**Note**: This project is a specialized fork of the excellent [CC Switch](https://github.com/farion1231/cc-switch) by Jason Young. It extends the original power of CLI management with a Peer-to-Peer (P2P) AI Token economy.
 
 </div>
+
+## 🌟 New Feature: P2P AI Market
+
+This edition introduces a decentralized way to share and monetize your AI quotas:
+
+- **Decentralized Discovery**: Powered by the **Nostr** protocol. Find AI nodes globally without a central server.
+- **Pay-as-you-go (X402)**: Real-time streaming payments via the **Lightning Network**. Pay only for the tokens you use.
+- **One-click Selling**: Use the built-in **Cloudflare Tunnel** to securely expose your local proxy as a global AI node.
+- **Seamless Switching**: Swap between global providers in seconds without restarting your terminal.
 
 ## ❤️Sponsor
 

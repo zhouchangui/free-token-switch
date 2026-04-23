@@ -190,9 +190,14 @@ export const MarketPanel = () => {
                 )}
             </div>
             
-            <div className="flex items-center gap-2 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-xs text-emerald-600 dark:text-emerald-400">
-                <ShieldCheck className="w-4 h-4" />
-                所有交易通过闪电网络 X402 协议按 Token 实时结算，无需预付，安全匿名。
+            <div className="flex flex-col gap-2 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-xs text-emerald-600 dark:text-emerald-400">
+                <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4" />
+                    所有交易通过闪电网络 X402 协议按 Token 实时结算，无需预付，安全匿名。
+                </div>
+                <div className="mt-1 opacity-60 text-[10px] text-center italic">
+                    Core engine powered by the open-source <a href="https://github.com/farion1231/cc-switch" target="_blank" className="underline">CC-Switch</a> project.
+                </div>
             </div>
         </div>
     );
