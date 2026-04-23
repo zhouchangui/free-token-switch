@@ -197,6 +197,37 @@ pub struct AuthBinding {
     pub account_id: Option<String>,
 }
 
+/// 供应商售卖配置（前端 sellerConfig）
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ProviderSellerConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mode: Option<String>,
+    #[serde(rename = "pricePer1kTokens", skip_serializing_if = "Option::is_none")]
+    pub price_per_1k_tokens: Option<u64>,
+    #[serde(
+        rename = "acceptsSuggestedPricing",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub accepts_suggested_pricing: Option<bool>,
+    #[serde(
+        rename = "suggestedPricePer1kTokens",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub suggested_price_per_1k_tokens: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub endpoint: Option<String>,
+    #[serde(rename = "accessToken", skip_serializing_if = "Option::is_none")]
+    pub access_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    #[serde(rename = "lastError", skip_serializing_if = "Option::is_none")]
+    pub last_error: Option<String>,
+    #[serde(rename = "lastPublishedAt", skip_serializing_if = "Option::is_none")]
+    pub last_published_at: Option<i64>,
+}
+
 /// 供应商元数据
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ProviderMeta {
@@ -273,6 +304,9 @@ pub struct ProviderMeta {
     /// 用于多账号支持，关联到特定的 GitHub 账号
     #[serde(rename = "githubAccountId", skip_serializing_if = "Option::is_none")]
     pub github_account_id: Option<String>,
+    /// 卖方配置（前端 sellerConfig）
+    #[serde(rename = "sellerConfig", skip_serializing_if = "Option::is_none")]
+    pub seller_config: Option<ProviderSellerConfig>,
 }
 
 impl ProviderMeta {
@@ -719,6 +753,59 @@ mod tests {
         let value = serde_json::to_value(&meta).expect("serialize ProviderMeta");
 
         assert!(value.get("pricingModelSource").is_none());
+    }
+
+    #[test]
+    fn provider_meta_round_trips_seller_config() {
+        let value = json!({
+            "sellerConfig": {
+                "enabled": true,
+                "mode": "paid",
+                "pricePer1kTokens": 12,
+                "acceptsSuggestedPricing": false,
+                "suggestedPricePer1kTokens": null,
+                "endpoint": "https://example.com",
+                "accessToken": "ccs_sell_token",
+                "status": "published",
+                "lastError": null,
+                "lastPublishedAt": 1712345678
+            }
+        });
+
+        let meta: ProviderMeta =
+            serde_json::from_value(value.clone()).expect("deserialize sellerConfig");
+        let serialized = serde_json::to_value(&meta).expect("serialize sellerConfig");
+
+        let seller = serialized
+            .get("sellerConfig")
+            .expect("sellerConfig should be present");
+        assert_eq!(seller.get("enabled").and_then(|v| v.as_bool()), Some(true));
+        assert_eq!(seller.get("mode").and_then(|v| v.as_str()), Some("paid"));
+        assert_eq!(
+            seller.get("pricePer1kTokens").and_then(|v| v.as_u64()),
+            Some(12)
+        );
+        assert_eq!(
+            seller
+                .get("acceptsSuggestedPricing")
+                .and_then(|v| v.as_bool()),
+            Some(false)
+        );
+        assert_eq!(
+            seller.get("endpoint").and_then(|v| v.as_str()),
+            Some("https://example.com")
+        );
+        assert_eq!(
+            seller.get("accessToken").and_then(|v| v.as_str()),
+            Some("ccs_sell_token")
+        );
+        assert_eq!(seller.get("status").and_then(|v| v.as_str()), Some("published"));
+        assert_eq!(
+            seller.get("lastPublishedAt").and_then(|v| v.as_i64()),
+            Some(1712345678)
+        );
+        assert!(seller.get("price_per_1k_tokens").is_none());
+        assert!(seller.get("access_token").is_none());
     }
 
     #[test]
