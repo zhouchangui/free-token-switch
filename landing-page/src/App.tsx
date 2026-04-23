@@ -71,8 +71,8 @@ function Hero() {
         transition={{ duration: 0.5 }}
         className="inline-flex items-center gap-2 px-4 py-1.5 bg-black border border-cyan-500/30 text-cyan-400 font-mono text-xs uppercase tracking-widest mb-8 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
       >
-        <span className="w-2 h-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-        v3.15.1_NODE_ACTIVE
+        <span className="w-2 h-2 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+        v3.15.6_STABLE_NODE_ACTIVE
       </motion.div>
 
       <motion.h1
@@ -91,44 +91,64 @@ function Hero() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="mt-8 text-lg font-mono text-zinc-400 max-w-2xl leading-relaxed"
       >
-        <span className="text-emerald-500">{'>'}{'>'}</span> Turn unused quotas into Lightning Network value. A unified CLI manager powered by <span className="text-cyan-300">Nostr</span> and <span className="text-cyan-300">LND</span>.
+        <span className="text-emerald-500">{'>'}{'>'}</span> Turn unused quotas into Lightning Network value. A unified CLI manager powered by <span className="text-cyan-300 font-bold">Nostr</span> and <span className="text-cyan-300 font-bold">X402</span>.
       </motion.p>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="mt-12 flex flex-col sm:flex-row items-center gap-4 font-mono text-sm uppercase tracking-wider"
+        className="mt-12 flex flex-col items-center gap-6"
       >
-        <a
-          href="https://github.com/zhouchangui/free-token-switch/releases/latest"
-          target="_blank"
-          rel="noreferrer"
-          className="group flex items-center justify-center gap-3 h-14 w-full sm:w-auto px-8 bg-cyan-500 hover:bg-cyan-400 text-black font-bold transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)]"
-        >
-          <Download className="w-4 h-4" />
-          Download_PKG
-        </a>
-        <a
-          href="#terminal"
-          className="group flex items-center justify-center gap-3 h-14 w-full sm:w-auto px-8 bg-black border border-cyan-500/40 text-cyan-400 hover:bg-cyan-950/30 hover:border-cyan-400 transition-all"
-        >
-          <Terminal className="w-4 h-4" />
-          View_Terminal
-        </a>
+        <div className="flex flex-wrap justify-center gap-4">
+          <a
+            href="https://github.com/zhouchangui/free-token-switch/releases/download/v3.15.6/Free.Token.Switch_3.15.6_universal.dmg"
+            className="group flex items-center gap-3 h-14 px-8 bg-white text-black font-bold transition-all hover:bg-cyan-400 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+          >
+            <Download className="w-4 h-4" />
+            macOS_Universal
+          </a>
+          <a
+            href="https://github.com/zhouchangui/free-token-switch/releases/download/v3.15.6/Free.Token.Switch_3.15.6_x64-setup.exe"
+            className="group flex items-center gap-3 h-14 px-8 bg-black border border-cyan-500/40 text-cyan-400 hover:bg-cyan-950/30 hover:border-cyan-400 transition-all"
+          >
+            <Monitor className="w-4 h-4" />
+            Windows_x64
+          </a>
+          <a
+            href="https://github.com/zhouchangui/free-token-switch/releases/download/v3.15.6/Free.Token.Switch_3.15.6_amd64.AppImage"
+            className="group flex items-center gap-3 h-14 px-8 bg-black border border-emerald-500/40 text-emerald-400 hover:bg-emerald-950/30 hover:border-emerald-400 transition-all"
+          >
+            <Zap className="w-4 h-4" />
+            Linux_AppImage
+          </a>
+        </div>
+
+        <div className="flex items-center gap-6 text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em]">
+          <span className="flex items-center gap-1.5"><ChevronRight className="w-3 h-3 text-cyan-500" /> Standalone_Binary</span>
+          <span className="flex items-center gap-1.5"><ChevronRight className="w-3 h-3 text-cyan-500" /> Open_Source</span>
+          <span className="flex items-center gap-1.5"><ChevronRight className="w-3 h-3 text-cyan-500" /> P2P_Protocol</span>
+        </div>
       </motion.div>
 
-      <motion.div
+      {/* Security/Installation Notice */}
+      <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-        className="mt-10 flex flex-wrap justify-center items-center gap-4 font-mono text-xs text-zinc-500"
+        transition={{ delay: 0.8 }}
+        className="mt-12 p-4 max-w-2xl border border-yellow-500/20 bg-yellow-500/5 rounded-lg text-left"
       >
-        <span>[ DARWIN ]</span>
-        <span>[ WINDOWS ]</span>
-        <span>[ LINUX ]</span>
-        <span className="text-cyan-900">|</span>
-        <span className="text-emerald-500/80">STANDALONE_BINARY</span>
+        <div className="flex gap-3">
+          <div className="mt-0.5"><Cpu className="w-4 h-4 text-yellow-500" /></div>
+          <div>
+            <h4 className="text-xs font-bold text-yellow-500 uppercase mb-1 tracking-widest underline decoration-yellow-500/50">Developer_Notice // Unsigned_Binary</h4>
+            <p className="text-[11px] leading-relaxed text-yellow-500/70 font-mono">
+              To keep the project $0 cost, binaries are unsigned. <br/>
+              <span className="text-white font-bold">macOS:</span> Right-click the app and select 'Open'. <br/>
+              <span className="text-white font-bold">Windows:</span> Click 'More Info' then 'Run Anyway'.
+            </p>
+          </div>
+        </div>
       </motion.div>
 
       {/* Abstract Tech Dashboard Graphic */}
@@ -294,22 +314,24 @@ function CTA() {
       <div className="max-w-3xl mx-auto text-center relative z-10 flex flex-col items-center">
         <Cpu className="w-12 h-12 text-cyan-500 mb-6 opacity-50" />
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 uppercase tracking-tight">
-          Initialize <span className="text-cyan-400">Connection</span>?
+          Initialize <span className="text-cyan-400">P2P_Connection</span>?
         </h2>
-        <p className="text-zinc-400 font-mono text-sm mb-10 max-w-xl mx-auto leading-relaxed">
-          It's 100% open source, free to use, and builds on the shoulders of giants. Turn your quota into reality.
+        <p className="text-zinc-400 font-mono text-sm mb-10 max-w-xl mx-auto leading-relaxed text-center">
+          Join the first trustless AI marketplace today. It's 100% open source, free to use, and builds on the shoulders of giants.
         </p>
-        <a
-          href="https://github.com/zhouchangui/free-token-switch/releases/latest"
-          target="_blank"
-          rel="noreferrer"
-          className="group relative inline-flex items-center justify-center gap-2 h-14 px-10 bg-cyan-500 text-black font-mono font-bold uppercase tracking-widest transition-all hover:bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.4)]"
-        >
-          <span className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-white mix-blend-difference" />
-          <span className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-white mix-blend-difference" />
-          Get_Software
-          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </a>
+        <div className="flex flex-wrap justify-center gap-4">
+          <a
+            href="https://github.com/zhouchangui/free-token-switch/releases/tag/v3.15.6"
+            target="_blank"
+            rel="noreferrer"
+            className="group relative inline-flex items-center justify-center gap-2 h-14 px-10 bg-cyan-500 text-black font-mono font-bold uppercase tracking-widest transition-all hover:bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+          >
+            <span className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-white mix-blend-difference" />
+            <span className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-white mix-blend-difference" />
+            Launch_v3.15.6
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </a>
+        </div>
       </div>
     </section>
   );
