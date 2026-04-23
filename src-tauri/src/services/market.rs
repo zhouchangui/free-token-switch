@@ -21,6 +21,7 @@ pub struct MarketListing {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SellerPricingSuggestion {
+    #[serde(rename = "pricePer1kTokens")]
     pub price_per_1k_tokens: u64,
     pub source: String,
 }
