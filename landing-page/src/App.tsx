@@ -39,9 +39,9 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3 group cursor-pointer">
           <div className="w-8 h-8 bg-cyan-950/50 border border-cyan-500/50 flex items-center justify-center group-hover:bg-cyan-900/50 group-hover:border-cyan-400 transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-            <Cpu className="w-4 h-4 text-cyan-400" />
+            <Zap className="w-4 h-4 text-cyan-400" />
           </div>
-          <span className="font-bold text-lg tracking-wider text-white">SYS.SWITCH_<span className="animate-pulse text-cyan-400">[]</span></span>
+          <span className="font-bold text-lg tracking-wider text-white">FREE.TOKEN.SWITCH_<span className="animate-pulse text-cyan-400">[]</span></span>
         </div>
         <div className="flex items-center gap-6">
           <a
@@ -321,7 +321,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between text-center md:text-left gap-6">
         <div className="flex items-center gap-3">
           <Zap className="text-cyan-500 w-5 h-5 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" fill="currentColor" />
-          <span className="font-bold font-mono tracking-widest text-white text-sm">SYS.SWITCH_<span className="text-emerald-500">V3</span></span>
+          <span className="font-bold font-mono tracking-widest text-white text-sm">FREE.TOKEN.SWITCH_<span className="text-emerald-500">V3</span></span>
         </div>
         <p className="text-zinc-600 font-mono text-[10px] uppercase tracking-widest">
           Decentralized fork of 
