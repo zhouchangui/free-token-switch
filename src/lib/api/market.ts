@@ -5,17 +5,20 @@ export interface SellerPricingSuggestion {
   source: string;
 }
 
+export interface StartSellingTokensInput {
+  providerId: string;
+  modelName: string;
+  // Backend command expects `price` and interprets it as sats per 1k tokens.
+  price: number;
+  endpoint: string;
+}
+
 export const marketApi = {
   async startCloudflareTunnel(port: number): Promise<string> {
     return await invoke("start_cloudflare_tunnel", { port });
   },
 
-  async startSellingTokens(input: {
-    providerId: string;
-    modelName: string;
-    price: number;
-    endpoint: string;
-  }): Promise<string> {
+  async startSellingTokens(input: StartSellingTokensInput): Promise<string> {
     return await invoke("start_selling_tokens", input);
   },
 
