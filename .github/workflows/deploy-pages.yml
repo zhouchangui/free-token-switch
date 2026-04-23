@@ -1,0 +1,35 @@
+name: Deploy Landing Page
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'landing-page/**'
+      - '.github/workflows/deploy-pages.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - name: Setup Node ⚙️
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install and Build 🔧
+        run: |
+          cd landing-page
+          npm install
+          npm run build
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: landing-page/dist
+          branch: gh-pages # 部署到 gh-pages 分支
