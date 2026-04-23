@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::process::Stdio;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::io::AsyncBufReadExt;
 use tokio::sync::RwLock;
 
@@ -16,6 +17,12 @@ pub struct MarketListing {
     pub endpoint: String,         // Cloudflare Tunnel 地址
     pub seller_pubkey: String,
     pub timestamp: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SellerPricingSuggestion {
+    pub price_per_1k_tokens: u64,
+    pub source: String,
 }
 
 pub struct MarketService {
@@ -79,11 +86,9 @@ impl MarketService {
                 break;
             }
             log::debug!("Cloudflared: {}", line.trim());
-            if let Some(pos) = line.find("https://") {
-                if let Some(end) = line[pos..].find(".trycloudflare.com") {
-                    tunnel_url = line[pos..pos + end + 19].to_string();
-                    break;
-                }
+            if let Some(url) = extract_cloudflare_tunnel_url(&line) {
+                tunnel_url = url;
+                break;
             }
         }
 
@@ -110,6 +115,25 @@ impl MarketService {
         Ok(event_id.to_string())
     }
 
+    pub fn generate_access_token_for(provider_id: &str) -> String {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis();
+        format!("ccs_sell_{}_{}", provider_id.replace('-', "_"), now)
+    }
+
+    pub fn suggest_price_for(_provider_id: &str) -> SellerPricingSuggestion {
+        SellerPricingSuggestion {
+            price_per_1k_tokens: 10,
+            source: "builtin-default".to_string(),
+        }
+    }
+
+    pub async fn stop_selling(&self, _provider_id: &str) -> Result<bool> {
+        Ok(true)
+    }
+
     /// 搜索市场上的供应商 (买方)
     pub async fn find_sellers(&self) -> Result<Vec<MarketListing>> {
         self.ensure_connected().await;
@@ -127,5 +151,51 @@ impl MarketService {
             }
         }
         Ok(results)
+    }
+}
+
+fn extract_cloudflare_tunnel_url(line: &str) -> Option<String> {
+    line.split_whitespace().find_map(|token| {
+        let start = token.find("https://")?;
+        let candidate = token[start..].trim_end_matches(|c: char| {
+            matches!(c, ',' | ';' | ')' | ']' | '"' | '\'')
+        });
+        if candidate.contains(".trycloudflare.com") {
+            Some(candidate.to_string())
+        } else {
+            None
+        }
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{extract_cloudflare_tunnel_url, MarketService};
+
+    #[test]
+    fn generate_access_token_returns_non_empty_value() {
+        let token = MarketService::generate_access_token_for("provider-1");
+        assert!(!token.is_empty());
+        assert!(token.starts_with("ccs_sell_"));
+    }
+
+    #[test]
+    fn suggested_price_is_positive() {
+        let suggestion = MarketService::suggest_price_for("provider-1");
+        assert!(suggestion.price_per_1k_tokens > 0);
+    }
+
+    #[test]
+    fn extract_cloudflare_tunnel_url_handles_trailing_punctuation() {
+        let line = "INF + https://abc-123.trycloudflare.com, route ready";
+        let url = extract_cloudflare_tunnel_url(line);
+        assert_eq!(url.as_deref(), Some("https://abc-123.trycloudflare.com"));
+    }
+
+    #[test]
+    fn extract_cloudflare_tunnel_url_returns_none_without_cloudflare_domain() {
+        let line = "INF + https://example.com ready";
+        let url = extract_cloudflare_tunnel_url(line);
+        assert_eq!(url, None);
     }
 }

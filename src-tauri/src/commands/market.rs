@@ -1,4 +1,4 @@
-use crate::services::market::MarketListing;
+use crate::services::market::{MarketListing, MarketService, SellerPricingSuggestion};
 use crate::store::AppState;
 use tauri::State;
 
@@ -45,4 +45,30 @@ pub async fn find_ai_sellers(state: State<'_, AppState>) -> Result<Vec<MarketLis
         .find_sellers()
         .await
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn stop_selling_tokens(
+    state: State<'_, AppState>,
+    #[allow(non_snake_case)] providerId: String,
+) -> Result<bool, String> {
+    state
+        .market_service
+        .stop_selling(&providerId)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn generate_seller_access_token(
+    #[allow(non_snake_case)] providerId: String,
+) -> Result<String, String> {
+    Ok(MarketService::generate_access_token_for(&providerId))
+}
+
+#[tauri::command]
+pub async fn get_suggested_seller_price(
+    #[allow(non_snake_case)] providerId: String,
+) -> Result<SellerPricingSuggestion, String> {
+    Ok(MarketService::suggest_price_for(&providerId))
 }
