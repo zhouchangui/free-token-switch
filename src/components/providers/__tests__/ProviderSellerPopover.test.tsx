@@ -1,6 +1,14 @@
 import type { Provider } from "@/types";
 import { marketApi } from "@/lib/api";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const { invokeMock } = vi.hoisted(() => ({
+  invokeMock: vi.fn(),
+}));
+
+vi.mock("@tauri-apps/api/core", () => ({
+  invoke: invokeMock,
+}));
 
 describe("provider seller config typing", () => {
   it("allows seller config to be stored inside provider meta", () => {
@@ -24,5 +32,23 @@ describe("provider seller config typing", () => {
 
   it("exposes market api wrappers from the api barrel", () => {
     expect(typeof marketApi.startCloudflareTunnel).toBe("function");
+  });
+
+  it("maps pricePer1kTokens to backend price payload field", async () => {
+    invokeMock.mockResolvedValueOnce("ok");
+
+    await marketApi.startSellingTokens({
+      providerId: "provider-1",
+      modelName: "gpt-4o-mini",
+      pricePer1kTokens: 42,
+      endpoint: "https://demo.trycloudflare.com",
+    } as any);
+
+    expect(invokeMock).toHaveBeenCalledWith("start_selling_tokens", {
+      providerId: "provider-1",
+      modelName: "gpt-4o-mini",
+      price: 42,
+      endpoint: "https://demo.trycloudflare.com",
+    });
   });
 });
