@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::process::Stdio;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::thread;
+use std::time::{Duration, Instant};
 use tokio::io::{AsyncBufReadExt, AsyncRead};
 use tokio::sync::{mpsc, Mutex, RwLock};
 use tokio::time::timeout;
@@ -49,7 +51,7 @@ impl MarketService {
         }
     }
 
-    /// 确保已连接到 Nostr 中继器（懒加载，仅在第一次调用时执行）
+    /// 确保中继器初始化完成；每次调用都会尝试连接，以支持自动重连。
     async fn ensure_connected(&self) {
         if !self.relays_initialized.load(Ordering::SeqCst) {
             let _connect_guard = self.connect_lock.lock().await;
@@ -164,6 +166,11 @@ impl MarketService {
     }
 
     pub fn stop_selling(&self, _provider_id: &str) -> Result<bool> {
+        if let Ok(mut guard) = self.tunnel_process.try_write() {
+            if let Some(mut child) = guard.take() {
+                stop_and_reap_child_sync(&mut child);
+            }
+        }
         Ok(true)
     }
 
@@ -226,22 +233,15 @@ where
     E: AsyncRead + Unpin + Send + 'static,
 {
     let (tx, mut rx) = mpsc::unbounded_channel::<String>();
-    let mut tasks = Vec::new();
-
     if let Some(stdout) = stdout {
-        tasks.push(tokio::spawn(pump_stream_for_tunnel_url(stdout, tx.clone())));
+        tokio::spawn(pump_stream_for_tunnel_url(stdout, tx.clone()));
     }
     if let Some(stderr) = stderr {
-        tasks.push(tokio::spawn(pump_stream_for_tunnel_url(stderr, tx.clone())));
+        tokio::spawn(pump_stream_for_tunnel_url(stderr, tx.clone()));
     }
     drop(tx);
 
-    let url = rx.recv().await;
-    for task in tasks {
-        task.abort();
-    }
-
-    Ok(url)
+    Ok(rx.recv().await)
 }
 
 async fn pump_stream_for_tunnel_url<R>(
@@ -252,10 +252,53 @@ where
     R: AsyncRead + Unpin + Send + 'static,
 {
     let mut reader = tokio::io::BufReader::new(stream);
-    if let Some(url) = wait_for_tunnel_url(&mut reader).await? {
-        let _ = tx.send(url);
+    let mut line = String::new();
+    let mut sent_first_url = false;
+
+    loop {
+        line.clear();
+        if reader.read_line(&mut line).await? == 0 {
+            break;
+        }
+
+        log::debug!("Cloudflared: {}", line.trim());
+        if !sent_first_url {
+            if let Some(url) = extract_cloudflare_tunnel_url(&line) {
+                sent_first_url = true;
+                let _ = tx.send(url);
+            }
+        }
     }
     Ok(())
+}
+
+fn stop_and_reap_child_sync(child: &mut tokio::process::Child) {
+    if matches!(child.try_wait(), Ok(Some(_))) {
+        return;
+    }
+
+    if let Err(e) = child.start_kill() {
+        log::warn!("停止 cloudflared 进程失败: {e}");
+        return;
+    }
+
+    let deadline = Instant::now() + Duration::from_secs(3);
+    loop {
+        match child.try_wait() {
+            Ok(Some(_)) => return,
+            Ok(None) => {
+                if Instant::now() >= deadline {
+                    log::warn!("等待 cloudflared 进程退出超时");
+                    return;
+                }
+                thread::sleep(Duration::from_millis(50));
+            }
+            Err(e) => {
+                log::warn!("等待 cloudflared 进程退出失败: {e}");
+                return;
+            }
+        }
+    }
 }
 
 async fn stop_and_reap_child(child: &mut tokio::process::Child) {
@@ -346,5 +389,20 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(url.as_deref(), Some("https://stdout-123.trycloudflare.com"));
+    }
+
+    #[tokio::test]
+    async fn wait_for_tunnel_url_from_streams_supports_stderr() {
+        let (stderr_reader, mut stderr_writer) = tokio::io::duplex(256);
+        tokio::spawn(async move {
+            let _ = stderr_writer
+                .write_all(b"ERR https://stderr-123.trycloudflare.com active\n")
+                .await;
+        });
+
+        let url = wait_for_tunnel_url_from_streams::<tokio::io::Empty, _>(None, Some(stderr_reader))
+            .await
+            .unwrap();
+        assert_eq!(url.as_deref(), Some("https://stderr-123.trycloudflare.com"));
     }
 }
