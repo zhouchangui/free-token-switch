@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 use std::process::Stdio;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
-use tokio::io::AsyncBufReadExt;
-use tokio::sync::{Mutex, RwLock};
+use tokio::io::{AsyncBufReadExt, AsyncRead};
+use tokio::sync::{mpsc, Mutex, RwLock};
 use tokio::time::timeout;
+use uuid::Uuid;
 
 /// AI 市场售卖公告
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,7 +31,7 @@ pub struct MarketService {
     keys: Keys,
     client: Client,
     tunnel_process: Arc<RwLock<Option<tokio::process::Child>>>,
-    connected: AtomicBool,
+    relays_initialized: AtomicBool,
     connect_lock: Mutex<()>,
 }
 
@@ -44,29 +44,38 @@ impl MarketService {
             keys,
             client,
             tunnel_process: Arc::new(RwLock::new(None)),
-            connected: AtomicBool::new(false),
+            relays_initialized: AtomicBool::new(false),
             connect_lock: Mutex::new(()),
         }
     }
 
     /// 确保已连接到 Nostr 中继器（懒加载，仅在第一次调用时执行）
     async fn ensure_connected(&self) {
-        if self.connected.load(Ordering::SeqCst) {
-            return;
-        }
-        let _connect_guard = self.connect_lock.lock().await;
-        if self.connected.load(Ordering::SeqCst) {
-            return;
+        if !self.relays_initialized.load(Ordering::SeqCst) {
+            let _connect_guard = self.connect_lock.lock().await;
+            if !self.relays_initialized.load(Ordering::SeqCst) {
+                let mut any_relay_added = false;
+
+                if let Err(e) = self.client.add_relay("wss://relay.damus.io").await {
+                    log::error!("添加 Nostr 中继器失败: {e}");
+                } else {
+                    any_relay_added = true;
+                }
+                if let Err(e) = self.client.add_relay("wss://nos.lol").await {
+                    log::error!("添加 Nostr 中继器失败: {e}");
+                } else {
+                    any_relay_added = true;
+                }
+
+                if any_relay_added {
+                    self.relays_initialized.store(true, Ordering::SeqCst);
+                } else {
+                    log::warn!("Nostr 中继器初始化失败，将在下次调用时重试");
+                }
+            }
         }
 
-        if let Err(e) = self.client.add_relay("wss://relay.damus.io").await {
-            log::error!("添加 Nostr 中继器失败: {e}");
-        }
-        if let Err(e) = self.client.add_relay("wss://nos.lol").await {
-            log::error!("添加 Nostr 中继器失败: {e}");
-        }
         self.client.connect().await;
-        self.connected.store(true, Ordering::SeqCst);
         log::info!("MarketService 已连接到 Nostr 网络");
     }
 
@@ -75,27 +84,26 @@ impl MarketService {
         // 1. 启动 cloudflared
         let mut child = tokio::process::Command::new("cloudflared")
             .args(["tunnel", "--url", &format!("http://localhost:{}", port)])
-            .stdout(Stdio::null())
+            .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
             .map_err(|e| {
                 anyhow::anyhow!("无法启动 cloudflared: {}. 请确保已安装 cloudflared。", e)
             })?;
 
-        // 2. 从 stderr 中读取生成的临时域名
-        let stderr = match child.stderr.take() {
-            Some(stderr) => stderr,
-            None => {
-                stop_and_reap_child(&mut child).await;
-                return Err(anyhow::anyhow!(
-                    "cloudflared 未提供 stderr 输出，无法获取隧道地址。"
-                ));
-            }
-        };
-        let mut reader = tokio::io::BufReader::new(stderr);
+        // 2. 从 stdout/stderr 中读取生成的临时域名（兼容不同 cloudflared 版本）
+        let stdout = child.stdout.take();
+        let stderr = child.stderr.take();
+        if stdout.is_none() && stderr.is_none() {
+            stop_and_reap_child(&mut child).await;
+            return Err(anyhow::anyhow!(
+                "cloudflared 未提供可读取的输出流，无法获取隧道地址。"
+            ));
+        }
+
         let tunnel_url = match timeout(
             std::time::Duration::from_secs(15),
-            wait_for_tunnel_url(&mut reader),
+            wait_for_tunnel_url_from_streams(stdout, stderr),
         )
         .await
         {
@@ -141,11 +149,11 @@ impl MarketService {
     }
 
     pub fn generate_access_token_for(provider_id: &str) -> String {
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_millis();
-        format!("ccs_sell_{}_{}", provider_id.replace('-', "_"), now)
+        format!(
+            "ccs_sell_{}_{}",
+            provider_id.replace('-', "_"),
+            Uuid::new_v4()
+        )
     }
 
     pub fn suggest_price_for(_provider_id: &str) -> SellerPricingSuggestion {
@@ -209,6 +217,47 @@ async fn wait_for_tunnel_url(
     }
 }
 
+async fn wait_for_tunnel_url_from_streams<S, E>(
+    stdout: Option<S>,
+    stderr: Option<E>,
+) -> Result<Option<String>>
+where
+    S: AsyncRead + Unpin + Send + 'static,
+    E: AsyncRead + Unpin + Send + 'static,
+{
+    let (tx, mut rx) = mpsc::unbounded_channel::<String>();
+    let mut tasks = Vec::new();
+
+    if let Some(stdout) = stdout {
+        tasks.push(tokio::spawn(pump_stream_for_tunnel_url(stdout, tx.clone())));
+    }
+    if let Some(stderr) = stderr {
+        tasks.push(tokio::spawn(pump_stream_for_tunnel_url(stderr, tx.clone())));
+    }
+    drop(tx);
+
+    let url = rx.recv().await;
+    for task in tasks {
+        task.abort();
+    }
+
+    Ok(url)
+}
+
+async fn pump_stream_for_tunnel_url<R>(
+    stream: R,
+    tx: mpsc::UnboundedSender<String>,
+) -> Result<()>
+where
+    R: AsyncRead + Unpin + Send + 'static,
+{
+    let mut reader = tokio::io::BufReader::new(stream);
+    if let Some(url) = wait_for_tunnel_url(&mut reader).await? {
+        let _ = tx.send(url);
+    }
+    Ok(())
+}
+
 async fn stop_and_reap_child(child: &mut tokio::process::Child) {
     if matches!(child.try_wait(), Ok(Some(_))) {
         return;
@@ -228,7 +277,10 @@ async fn stop_and_reap_child(child: &mut tokio::process::Child) {
 
 #[cfg(test)]
 mod tests {
-    use super::{extract_cloudflare_tunnel_url, wait_for_tunnel_url, MarketService};
+    use super::{
+        extract_cloudflare_tunnel_url, wait_for_tunnel_url, wait_for_tunnel_url_from_streams,
+        MarketService,
+    };
     use tokio::io::AsyncWriteExt;
 
     #[test]
@@ -236,6 +288,13 @@ mod tests {
         let token = MarketService::generate_access_token_for("provider-1");
         assert!(!token.is_empty());
         assert!(token.starts_with("ccs_sell_"));
+    }
+
+    #[test]
+    fn generate_access_token_is_non_predictable() {
+        let token_a = MarketService::generate_access_token_for("provider-1");
+        let token_b = MarketService::generate_access_token_for("provider-1");
+        assert_ne!(token_a, token_b);
     }
 
     #[test]
@@ -272,5 +331,20 @@ mod tests {
         let mut reader = tokio::io::BufReader::new(stream_reader);
         let url = wait_for_tunnel_url(&mut reader).await.unwrap();
         assert_eq!(url.as_deref(), Some("https://demo-123.trycloudflare.com"));
+    }
+
+    #[tokio::test]
+    async fn wait_for_tunnel_url_from_streams_supports_stdout() {
+        let (stdout_reader, mut stdout_writer) = tokio::io::duplex(256);
+        tokio::spawn(async move {
+            let _ = stdout_writer
+                .write_all(b"INF https://stdout-123.trycloudflare.com active\n")
+                .await;
+        });
+
+        let url = wait_for_tunnel_url_from_streams(Some(stdout_reader), None)
+            .await
+            .unwrap();
+        assert_eq!(url.as_deref(), Some("https://stdout-123.trycloudflare.com"));
     }
 }
