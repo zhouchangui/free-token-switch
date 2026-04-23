@@ -1216,17 +1216,17 @@ mod tests {
 
     /// Run a test with an isolated temp home directory.
     ///
-    /// Saves and restores `CC_SWITCH_TEST_HOME` to avoid interfering with
+    /// Saves and restores `TOKENS_BUDDY_TEST_HOME` to avoid interfering with
     /// parallel tests in other modules.
     fn with_test_home<T>(test_fn: impl FnOnce() -> T) -> T {
         let _guard = test_guard();
         let tmp = tempfile::tempdir().unwrap();
-        let old_test_home = std::env::var_os("CC_SWITCH_TEST_HOME");
-        std::env::set_var("CC_SWITCH_TEST_HOME", tmp.path());
+        let old_test_home = std::env::var_os("TOKENS_BUDDY_TEST_HOME");
+        std::env::set_var("TOKENS_BUDDY_TEST_HOME", tmp.path());
         let result = test_fn();
         match old_test_home {
-            Some(value) => std::env::set_var("CC_SWITCH_TEST_HOME", value),
-            None => std::env::remove_var("CC_SWITCH_TEST_HOME"),
+            Some(value) => std::env::set_var("TOKENS_BUDDY_TEST_HOME", value),
+            None => std::env::remove_var("TOKENS_BUDDY_TEST_HOME"),
         }
         result
     }

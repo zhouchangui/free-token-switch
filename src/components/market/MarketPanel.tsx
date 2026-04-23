@@ -196,7 +196,7 @@ export const MarketPanel = () => {
                     所有交易通过闪电网络 X402 协议按 Token 实时结算，无需预付，安全匿名。
                 </div>
                 <div className="mt-1 opacity-60 text-[10px] text-center italic">
-                    Core engine powered by the open-source <a href="https://github.com/farion1231/cc-switch" target="_blank" className="underline">CC-Switch</a> project.
+                    Core engine powered by the open-source <a href="https://github.com/farion1231/tokens-buddy" target="_blank" className="underline">TokensBuddy</a> project.
                 </div>
             </div>
         </div>

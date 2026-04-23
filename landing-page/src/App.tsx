@@ -49,7 +49,7 @@ function Navbar() {
           <div className="w-8 h-8 bg-cyan-950/50 border border-cyan-500/50 flex items-center justify-center group-hover:bg-cyan-900/50 group-hover:border-cyan-400 transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)]">
             <Zap className="w-4 h-4 text-cyan-400" />
           </div>
-          <span className="font-bold text-lg tracking-wider text-white uppercase">FREE.TOKEN.SWITCH_<span className="animate-pulse text-cyan-400">[]</span></span>
+          <span className="font-bold text-lg tracking-wider text-white uppercase">TOKENS.BUDDY_<span className="animate-pulse text-cyan-400">[]</span></span>
         </div>
         <div className="flex items-center gap-4 sm:gap-6">
           <button
@@ -60,7 +60,7 @@ function Navbar() {
             {i18n.language === 'zh' ? 'EN' : '中文'}
           </button>
           <a
-            href="https://github.com/zhouchangui/free-token-switch"
+            href="https://github.com/farion1231/tokens-buddy"
             target="_blank"
             rel="noreferrer"
             className="font-mono text-xs text-cyan-500/70 hover:text-cyan-400 transition-colors flex items-center gap-2"
@@ -119,21 +119,21 @@ function Hero() {
       >
         <div className="flex flex-wrap justify-center gap-4 text-balance">
           <a
-            href="https://github.com/zhouchangui/free-token-switch/releases/download/v3.15.6/Free.Token.Switch_3.15.6_universal.dmg"
+            href="https://github.com/farion1231/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_universal.dmg"
             className="group flex items-center gap-3 h-14 px-8 bg-white text-black font-bold transition-all hover:bg-cyan-400 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
           >
             <Download className="w-4 h-4" />
             {t('hero.downloadMac')}
           </a>
           <a
-            href="https://github.com/zhouchangui/free-token-switch/releases/download/v3.15.6/Free.Token.Switch_3.15.6_x64-setup.exe"
+            href="https://github.com/farion1231/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_x64-setup.exe"
             className="group flex items-center gap-3 h-14 px-8 bg-black border border-cyan-500/40 text-cyan-400 hover:bg-cyan-950/30 hover:border-cyan-400 transition-all"
           >
             <Monitor className="w-4 h-4" />
             {t('hero.downloadWin')}
           </a>
           <a
-            href="https://github.com/zhouchangui/free-token-switch/releases/download/v3.15.6/Free.Token.Switch_3.15.6_amd64.AppImage"
+            href="https://github.com/farion1231/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_amd64.AppImage"
             className="group flex items-center gap-3 h-14 px-8 bg-black border border-emerald-500/40 text-emerald-400 hover:bg-emerald-950/30 hover:border-emerald-400 transition-all"
           >
             <Zap className="w-4 h-4" />
@@ -292,7 +292,7 @@ function TerminalDemo() {
             
             <div className="p-6 font-mono text-sm leading-8 text-zinc-300 overflow-x-auto whitespace-pre">
               <div>
-                <span className="text-emerald-400 font-bold">sys@local</span><span className="text-zinc-500">:~#</span> <span className="text-white drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]">cc-switch start</span>
+                <span className="text-emerald-400 font-bold">sys@local</span><span className="text-zinc-500">:~#</span> <span className="text-white drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]">tokens-buddy start</span>
               </div>
               <div className="text-cyan-400/80">
                 {t('terminal.init')}
@@ -363,16 +363,16 @@ function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between text-center md:text-left gap-6 text-balance">
         <div className="flex items-center gap-3">
           <Zap className="text-cyan-500 w-5 h-5 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" fill="currentColor" />
-          <span className="font-bold font-mono tracking-widest text-white text-sm">FREE.TOKEN.SWITCH_<span className="text-emerald-500">V3</span></span>
+          <span className="font-bold font-mono tracking-widest text-white text-sm">TOKENS.BUDDY_<span className="text-emerald-500">V3</span></span>
         </div>
         <p className="text-zinc-600 font-mono text-[10px] uppercase tracking-widest">
           {t('footer.fork')} 
-          <a href="https://github.com/farion1231/cc-switch" target="_blank" rel="noreferrer" className="text-cyan-500/70 hover:text-cyan-400 ml-2">CC-SWITCH</a>
+          <a href="https://github.com/farion1231/tokens-buddy" target="_blank" rel="noreferrer" className="text-cyan-500/70 hover:text-cyan-400 ml-2">TOKENS-BUDDY</a>
           <br className="md:hidden"/> // MIT_LICENSE // OPEN_SOURCE
         </p>
         <div className="flex gap-4">
           <a
-            href="https://github.com/zhouchangui/free-token-switch"
+            href="https://github.com/farion1231/tokens-buddy"
             target="_blank"
             rel="noreferrer"
             className="w-10 h-10 border border-cyan-900 bg-cyan-950/20 hover:bg-cyan-900/50 hover:border-cyan-500 flex items-center justify-center text-cyan-500 transition-all"

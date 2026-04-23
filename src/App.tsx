@@ -28,6 +28,7 @@ import {
   Cpu,
   Globe,
   LayoutDashboard,
+  Zap,
 } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Provider, VisibleApps } from "@/types";
@@ -121,7 +122,7 @@ interface WebDavSyncStatusUpdatedPayload {
 const DEFAULT_DRAG_BAR_HEIGHT = isWindows() || isLinux() ? 0 : 28; // px
 const HEADER_HEIGHT = 64; // px
 
-const STORAGE_KEY = "cc-switch-last-app";
+const STORAGE_KEY = "tokens-buddy-last-app";
 const VALID_APPS: AppId[] = [
   "claude",
   "codex",
@@ -139,7 +140,7 @@ const getInitialApp = (): AppId => {
   return "claude";
 };
 
-const VIEW_STORAGE_KEY = "cc-switch-last-view";
+const VIEW_STORAGE_KEY = "tokens-buddy-last-view";
 const VALID_VIEWS: View[] = [
   "providers",
   "settings",
@@ -1193,9 +1194,15 @@ function App() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <div className="relative inline-flex items-center">
+                <div className="relative inline-flex items-center gap-2">
+                  <Zap className={cn(
+                    "w-5 h-5",
+                    isProxyRunning && isCurrentAppTakeoverActive
+                      ? "text-emerald-500 dark:text-emerald-400"
+                      : "text-blue-500 dark:text-blue-400"
+                  )} fill="currentColor" />
                   <a
-                    href="https://github.com/farion1231/cc-switch"
+                    href="https://github.com/farion1231/tokens-buddy"
                     target="_blank"
                     rel="noreferrer"
                     className={cn(
@@ -1205,7 +1212,7 @@ function App() {
                         : "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300",
                     )}
                   >
-                    CC Switch
+                    {t("app.title")}
                   </a>
                 </div>
                 <Button

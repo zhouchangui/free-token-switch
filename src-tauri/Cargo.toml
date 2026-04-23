@@ -1,17 +1,17 @@
 [package]
-name = "cc-switch"
+name = "tokens-buddy"
 version = "3.14.0"
-description = "All-in-One Assistant for Claude Code, Codex & Gemini CLI"
+description = "TokensBuddy - Share unused tokens with friends or exchange for money (USTC, JD Clawtip)."
 authors = ["Jason Young"]
 license = "MIT"
-repository = "https://github.com/farion1231/cc-switch"
+repository = "https://github.com/farion1231/tokens-buddy"
 edition = "2021"
 rust-version = "1.85.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "cc_switch_lib"
+name = "tokens_buddy_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 doctest = false
 

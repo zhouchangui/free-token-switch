@@ -1,7 +1,7 @@
 {
-  "name": "cc-switch",
+  "name": "tokens-buddy",
   "version": "3.15.6",
-  "description": "All-in-One Assistant for Claude Code, Codex & Gemini CLI",
+  "description": "TokensBuddy - Share unused tokens with friends or exchange for money (USTC, JD Clawtip).",
   "type": "module",
   "scripts": {
     "dev": "pnpm tauri dev",
