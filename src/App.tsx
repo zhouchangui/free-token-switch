@@ -26,6 +26,7 @@ import {
   KeyRound,
   Shield,
   Cpu,
+  Globe,
   LayoutDashboard,
 } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -81,6 +82,7 @@ import { UniversalProviderPanel } from "@/components/universal";
 import { McpIcon } from "@/components/BrandIcons";
 import { Button } from "@/components/ui/button";
 import { SessionManagerPage } from "@/components/sessions/SessionManagerPage";
+import { MarketPanel } from "@/components/market/MarketPanel";
 import {
   useDisableCurrentOmo,
   useDisableCurrentOmoSlim,
@@ -104,6 +106,7 @@ type View =
   | "universal"
   | "sessions"
   | "workspace"
+  | "market"
   | "openclawEnv"
   | "openclawTools"
   | "openclawAgents"
@@ -148,6 +151,7 @@ const VALID_VIEWS: View[] = [
   "universal",
   "sessions",
   "workspace",
+  "market",
   "openclawEnv",
   "openclawTools",
   "openclawAgents",
@@ -956,6 +960,8 @@ function App() {
           return <SessionManagerPage key={activeApp} appId={activeApp} />;
         case "workspace":
           return <WorkspaceFilesPanel />;
+        case "market":
+          return <MarketPanel />;
         case "openclawEnv":
           return <EnvPanel />;
         case "openclawTools":
@@ -1177,6 +1183,7 @@ function App() {
                     })}
                   {currentView === "sessions" && t("sessionManager.title")}
                   {currentView === "workspace" && t("workspace.title")}
+                  {currentView === "market" && t("market.title", { defaultValue: "算力集市" })}
                   {currentView === "openclawEnv" && t("openclaw.env.title")}
                   {currentView === "openclawTools" && t("openclaw.tools.title")}
                   {currentView === "openclawAgents" &&
@@ -1235,6 +1242,15 @@ function App() {
                     <BarChart2 className="w-4 h-4" />
                   </Button>
                 )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentView("market")}
+                  title={t("market.title", { defaultValue: "算力集市" })}
+                  className="hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  <Globe className="w-4 h-4" />
+                </Button>
               </div>
             )}
           </div>

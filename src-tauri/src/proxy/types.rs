@@ -25,6 +25,38 @@ pub struct ProxyConfig {
     /// 非流式总超时（秒）- 非流式请求的总超时时间，范围 60-1200 秒，默认 600 秒（10 分钟）
     #[serde(default = "default_non_streaming_timeout")]
     pub non_streaming_timeout: u64,
+    /// P2P 市场配置
+    #[serde(default)]
+    pub p2p_market: P2PMarketConfig,
+}
+
+/// P2P 市场配置
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct P2PMarketConfig {
+    /// 是否开启售卖模式
+    pub enabled: bool,
+    /// 模型单价 (每 1k tokens 多少聪/Sats)
+    pub price_per_1k_tokens: u64,
+    /// 闪电网络收款地址 (LNURL 或 Lightning Address)
+    pub lightning_address: String,
+    /// Nostr 中继器列表
+    pub nostr_relays: Vec<String>,
+}
+
+impl Default for P2PMarketConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            price_per_1k_tokens: 10, // 默认 10 sats / 1k tokens
+            lightning_address: "".to_string(),
+            nostr_relays: vec![
+                "wss://relay.damus.io".to_string(),
+                "wss://nos.lol".to_string(),
+                "wss://relay.snort.social".to_string(),
+            ],
+        }
+    }
 }
 
 fn default_streaming_first_byte_timeout() -> u64 {
@@ -51,6 +83,7 @@ impl Default for ProxyConfig {
             streaming_first_byte_timeout: 60,
             streaming_idle_timeout: 120,
             non_streaming_timeout: 600,
+            p2p_market: P2PMarketConfig::default(),
         }
     }
 }

@@ -401,6 +401,7 @@ impl Database {
                         streaming_first_byte_timeout: row.get::<_, i32>(4).unwrap_or(60) as u64,
                         streaming_idle_timeout: row.get::<_, i32>(5).unwrap_or(120) as u64,
                         non_streaming_timeout: row.get::<_, i32>(6).unwrap_or(600) as u64,
+                        p2p_market: crate::proxy::types::P2PMarketConfig::default(),
                     })
                 },
             )

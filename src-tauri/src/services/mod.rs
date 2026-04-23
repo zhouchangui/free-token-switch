@@ -1,3 +1,4 @@
+pub mod market;
 pub mod balance;
 pub mod coding_plan;
 pub mod config;

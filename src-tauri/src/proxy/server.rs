@@ -324,6 +324,11 @@ impl ProxyServer {
             // Gemini API (支持带前缀和不带前缀)
             .route("/v1beta/*path", post(handlers::handle_gemini))
             .route("/gemini/v1beta/*path", post(handlers::handle_gemini))
+            // P2P 市场支付检查 (X402)
+            .layer(axum::middleware::from_fn_with_state(
+                self.state.clone(),
+                super::x402::x402_middleware,
+            ))
             // 提高默认请求体大小限制（避免 413 Payload Too Large）
             .layer(DefaultBodyLimit::max(200 * 1024 * 1024))
             .with_state(self.state.clone())

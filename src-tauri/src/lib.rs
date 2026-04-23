@@ -1119,7 +1119,11 @@ pub fn run() {
             commands::webdav_sync_save_settings,
             commands::webdav_sync_fetch_remote_info,
             commands::save_file_dialog,
+            commands::start_selling_tokens,
+            commands::find_ai_sellers,
+            commands::start_cloudflare_tunnel,
             commands::open_file_dialog,
+
             commands::open_zip_file_dialog,
             commands::create_db_backup,
             commands::list_db_backups,
