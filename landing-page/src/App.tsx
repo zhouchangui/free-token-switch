@@ -79,19 +79,19 @@ function Hero() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="text-5xl md:text-7xl lg:text-[90px] font-bold tracking-tighter text-white max-w-5xl leading-[0.95] uppercase"
+        className="text-5xl md:text-7xl lg:text-[80px] font-bold tracking-tighter text-white max-w-5xl leading-[1.05] uppercase"
       >
-        Free Token <br className="hidden md:block" />
-        <span className="text-gradient-cyber">Switch_P2P</span>
+        分享 AI 额度给好友 <br className="hidden md:block" />
+        <span className="text-gradient-cyber text-[0.8em]">或者将 Token 兑换成价值</span>
       </motion.h1>
 
       <motion.p
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="mt-8 text-lg font-mono text-zinc-400 max-w-2xl leading-relaxed"
+        className="mt-8 text-lg font-mono text-zinc-400 max-w-3xl leading-relaxed"
       >
-        <span className="text-emerald-500">{'>'}{'>'}</span> Turn unused quotas into Lightning Network value. A unified CLI manager powered by <span className="text-cyan-300 font-bold">Nostr</span> and <span className="text-cyan-300 font-bold">X402</span>.
+        <span className="text-emerald-500">{'>'}{'>'}</span> 无论是 Claude Pro 还是 Gemini 订阅，不再浪费。通过 <span className="text-cyan-300 font-bold">Nostr</span> 发现好友，利用 <span className="text-cyan-300 font-bold">X402</span> 实时结算。
       </motion.p>
 
       <motion.div
@@ -183,23 +183,23 @@ function Features() {
   const features = [
     {
       icon: Network,
-      title: "NOSTR_RELAY",
-      description: "Find global AI nodes instantly. Seller announcements broadcasted across decentralized relays."
+      title: "去中心化好友发现",
+      description: "基于 Nostr 协议，无需注册。在全球中继器上实时寻找好友或优质算力供应商。"
     },
     {
       icon: Zap,
-      title: "LND_X402",
-      description: "Pay per token using the Lightning Network. Micro-transactions guarantee trustless settlements."
+      title: "按 Token 实时结账",
+      description: "集成 X402 (L402) 协议。无需预付，用多少扣多少，每一笔 Sats 支付都清晰可见。"
     },
     {
       icon: Cloud,
-      title: "TNL_EXPOSE",
-      description: "Built-in Cloudflare Tunnel integration securely exposes your proxy. Monetize unused quota."
+      title: "一键开启摆摊模式",
+      description: "内置 Cloudflare Tunnel 自动化。轻轻一拨，你的电脑就是全球可访问的 AI 节点。"
     },
     {
       icon: RefreshCw,
-      title: "HOT_SWAP",
-      description: "CLI tools persist. Switch providers in the UI and traffic routes instantly without dropping."
+      title: "丝滑无感热切换",
+      description: "在 UI 切换节点后，你正在运行的终端 CLI 无需重启，流量路径秒级重定向。"
     }
   ];
 
@@ -250,7 +250,7 @@ function TerminalDemo() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-white mb-2 uppercase tracking-tight">
-            Workflow <span className="text-cyan-400">Integration</span>
+            全流程 <span className="text-cyan-400">无缝集成</span>
           </h2>
           <p className="font-mono text-zinc-500">{'>'}{'>'} EXECUTE_ON_LOCAL_HOST</p>
         </div>
@@ -279,24 +279,24 @@ function TerminalDemo() {
                 <span className="text-emerald-400 font-bold">sys@local</span><span className="text-zinc-500">:~#</span> <span className="text-white drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]">cc-switch start</span>
               </div>
               <div className="text-cyan-400/80">
-                [INIT] Loading protocol definition...
+                [INIT] 正在加载协议定义...
               </div>
               <div className="text-emerald-400/80 flex items-center gap-2">
-                <span className="text-xs">[OK]</span> Local proxy instance active on port 15721
+                <span className="text-xs">[OK]</span> 本地代理实例已在 15721 端口就绪
               </div>
               <div className="text-emerald-400/80 flex items-center gap-2 mb-6">
-                <span className="text-xs">[OK]</span> LND Handshake valid. Connected to Nostr.
+                <span className="text-xs">[OK]</span> LND 握手成功。已接入 Nostr。
               </div>
 
               <div>
                 <span className="text-emerald-400 font-bold">sys@local</span><span className="text-zinc-500">:~#</span> <span className="text-white drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]">claude code</span>
               </div>
               <div className="text-zinc-500 mb-2 italic">
-                {'>'} Initializing connection to P2P node [claude-3-5-sonnet] @ 10 sats/1k
+                {'>'} 正在连接 P2P 节点 [claude-3-5-sonnet] @ 10 sats/1k
               </div>
               <div className="text-cyan-100/90 mb-2 flex flex-col md:flex-row md:items-start gap-2">
                 <span className="bg-cyan-900/50 px-2 border border-cyan-500/30 text-cyan-300 text-[10px] tracking-widest uppercase mt-1 w-fit">Recv:</span>
-                <span className="text-emerald-300 font-sans tracking-wide">System online. Architectural parameters loaded. How shall we construct today?</span>
+                <span className="text-emerald-300 font-sans tracking-wide">系统在线。架构参数已加载。今天我们想构建什么？</span>
               </div>
               <div className="animate-pulse w-2.5 h-5 bg-cyan-400 inline-block align-middle mt-2" />
             </div>
@@ -314,10 +314,10 @@ function CTA() {
       <div className="max-w-3xl mx-auto text-center relative z-10 flex flex-col items-center">
         <Cpu className="w-12 h-12 text-cyan-500 mb-6 opacity-50" />
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 uppercase tracking-tight">
-          Initialize <span className="text-cyan-400">P2P_Connection</span>?
+          立即开启 <span className="text-cyan-400">P2P_算力之旅</span>?
         </h2>
-        <p className="text-zinc-400 font-mono text-sm mb-10 max-w-xl mx-auto leading-relaxed text-center">
-          Join the first trustless AI marketplace today. It's 100% open source, free to use, and builds on the shoulders of giants.
+        <p className="text-zinc-400 font-mono text-sm mb-10 max-w-xl mx-auto leading-relaxed text-center text-balance">
+          加入首个去信任的 AI 共享市场。100% 开源，免费使用，让你的 AI 额度发挥最大价值。
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <a
@@ -328,7 +328,7 @@ function CTA() {
           >
             <span className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-white mix-blend-difference" />
             <span className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-white mix-blend-difference" />
-            Launch_v3.15.6
+            立刻下载_v3.15.6
             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
         </div>
