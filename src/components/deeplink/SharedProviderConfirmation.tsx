@@ -69,7 +69,7 @@ export function SharedProviderConfirmation({
               })}
             />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-[200] max-h-64 overflow-y-auto">
             {models.map((model) => (
               <SelectItem key={model.id} value={model.id}>
                 {model.id}

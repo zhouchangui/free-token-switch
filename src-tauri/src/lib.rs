@@ -96,7 +96,11 @@ fn redact_url_for_log(url_str: &str) -> String {
     }
 }
 
-/// 统一处理 tokensbuddy:// 深链接 URL
+fn is_deeplink_url(url_str: &str) -> bool {
+    url_str.starts_with("ccswitch://") || url_str.starts_with("tokensbuddy://")
+}
+
+/// 统一处理 ccswitch:// / tokensbuddy:// 深链接 URL
 ///
 /// - 解析 URL
 /// - 向前端发射 `deeplink-import` / `deeplink-error` 事件
@@ -107,7 +111,7 @@ fn handle_deeplink_url(
     focus_main_window: bool,
     source: &str,
 ) -> bool {
-    if !url_str.starts_with("tokensbuddy://") {
+    if !is_deeplink_url(url_str) {
         return false;
     }
 
@@ -710,7 +714,7 @@ pub fn run() {
                         log::debug!("  URL[{i}]: {}", redact_url_for_log(url_str));
 
                         if handle_deeplink_url(&app_handle, url_str, true, "on_open_url") {
-                            break; // Process only first tokensbuddy:// URL
+                            break; // Process only first supported deep-link URL
                         }
                     }
                 }
@@ -1355,13 +1359,13 @@ pub fn run() {
                         }
                     }
                 }
-                // 处理通过自定义 URL 协议触发的打开事件（例如 tokensbuddy://...）
+                // 处理通过自定义 URL 协议触发的打开事件（例如 ccswitch://...）
                 RunEvent::Opened { urls } => {
                     if let Some(url) = urls.first() {
                         let url_str = url.to_string();
                         log::info!("RunEvent::Opened with URL: {url_str}");
 
-                        if url_str.starts_with("tokensbuddy://") {
+                        if is_deeplink_url(&url_str) {
                             if crate::lightweight::is_lightweight_mode() {
                                 if let Err(e) = crate::lightweight::exit_lightweight_mode(app_handle)
                                 {

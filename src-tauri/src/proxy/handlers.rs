@@ -34,6 +34,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use bytes::Bytes;
 use http_body_util::BodyExt;
 use serde_json::{json, Value};
+use std::collections::BTreeSet;
 
 // ============================================================================
 // 健康检查和状态查询（简单端点）
@@ -89,11 +90,32 @@ pub async fn handle_models(
         .get("ANTHROPIC_AUTH_TOKEN")
         .and_then(|value| value.as_str())
         .or_else(|| env.get("ANTHROPIC_API_KEY").and_then(|value| value.as_str()))
-        .ok_or_else(|| ProxyError::ConfigError("Anthropic auth token missing".to_string()))?;
+        .unwrap_or_default();
 
-    let models = crate::services::model_fetch::fetch_models(base_url, api_key, false)
-        .await
-        .map_err(ProxyError::ForwardFailed)?;
+    let models = if api_key.trim().is_empty() {
+        configured_models_for_shared_provider(&provider.settings_config)
+    } else {
+        match crate::services::model_fetch::fetch_models(base_url, api_key, false).await {
+            Ok(models) => models,
+            Err(error) => {
+                let configured_models =
+                    configured_models_for_shared_provider(&provider.settings_config);
+                if configured_models.is_empty() {
+                    return Err(ProxyError::ForwardFailed(error));
+                }
+                log::warn!(
+                    "获取共享 Provider 上游模型列表失败，回退到本地配置模型: {error}"
+                );
+                configured_models
+            }
+        }
+    };
+
+    if models.is_empty() {
+        return Err(ProxyError::ConfigError(
+            "No models configured for shared provider".to_string(),
+        ));
+    }
 
     let data: Vec<Value> = models
         .into_iter()
@@ -110,6 +132,41 @@ pub async fn handle_models(
         "object": "list",
         "data": data,
     })))
+}
+
+fn configured_models_for_shared_provider(
+    settings_config: &Value,
+) -> Vec<crate::services::model_fetch::FetchedModel> {
+    let mut ids = BTreeSet::new();
+    let candidate_paths: &[&[&str]] = &[
+        &["env", "ANTHROPIC_MODEL"],
+        &["env", "ANTHROPIC_DEFAULT_HAIKU_MODEL"],
+        &["env", "ANTHROPIC_DEFAULT_SONNET_MODEL"],
+        &["env", "ANTHROPIC_DEFAULT_OPUS_MODEL"],
+        &["model"],
+        &["config", "model"],
+        &["config", "model_provider"],
+    ];
+
+    for path in candidate_paths {
+        if let Some(model) = value_at_path(settings_config, path).and_then(Value::as_str) {
+            let trimmed = model.trim();
+            if !trimmed.is_empty() {
+                ids.insert(trimmed.to_string());
+            }
+        }
+    }
+
+    ids.into_iter()
+        .map(|id| crate::services::model_fetch::FetchedModel {
+            id,
+            owned_by: Some("local-config".to_string()),
+        })
+        .collect()
+}
+
+fn value_at_path<'a>(value: &'a Value, path: &[&str]) -> Option<&'a Value> {
+    path.iter().try_fold(value, |current, key| current.get(key))
 }
 
 // ============================================================================
@@ -695,5 +752,28 @@ async fn log_usage(
         is_streaming,
     ) {
         log::warn!("[USG-001] 记录使用量失败: {e}");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::configured_models_for_shared_provider;
+    use serde_json::json;
+
+    #[test]
+    fn configured_models_for_shared_provider_uses_claude_model_env() {
+        let settings_config = json!({
+            "env": {
+                "ANTHROPIC_MODEL": "gpt-5.4",
+                "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gpt-5.4-mini",
+                "ANTHROPIC_DEFAULT_SONNET_MODEL": "gpt-5.4",
+                "ANTHROPIC_DEFAULT_OPUS_MODEL": ""
+            }
+        });
+
+        let models = configured_models_for_shared_provider(&settings_config);
+        let ids: Vec<_> = models.into_iter().map(|model| model.id).collect();
+
+        assert_eq!(ids, vec!["gpt-5.4", "gpt-5.4-mini"]);
     }
 }

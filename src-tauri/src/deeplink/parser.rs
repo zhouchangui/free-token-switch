@@ -1,6 +1,6 @@
 //! Deep link URL parser
 //!
-//! Parses tokensbuddy:// URLs into DeepLinkImportRequest structures.
+//! Parses ccswitch:// and tokensbuddy:// URLs into DeepLinkImportRequest structures.
 
 use super::utils::validate_url;
 use super::DeepLinkImportRequest;
@@ -8,10 +8,12 @@ use crate::error::AppError;
 use std::collections::HashMap;
 use url::Url;
 
-/// Parse a tokensbuddy:// URL into a DeepLinkImportRequest
+const SUPPORTED_SCHEMES: &[&str] = &["ccswitch", "tokensbuddy"];
+
+/// Parse a ccswitch:// or tokensbuddy:// URL into a DeepLinkImportRequest
 ///
 /// Expected format:
-/// tokensbuddy://v1/import?resource={type}&...
+/// ccswitch://v1/import?resource={type}&...
 pub fn parse_deeplink_url(url_str: &str) -> Result<DeepLinkImportRequest, AppError> {
     // Parse URL
     let url = Url::parse(url_str)
@@ -19,9 +21,9 @@ pub fn parse_deeplink_url(url_str: &str) -> Result<DeepLinkImportRequest, AppErr
 
     // Validate scheme
     let scheme = url.scheme();
-    if scheme != "tokensbuddy" {
+    if !SUPPORTED_SCHEMES.contains(&scheme) {
         return Err(AppError::InvalidInput(format!(
-            "Invalid scheme: expected 'tokensbuddy', got '{scheme}'"
+            "Invalid scheme: expected 'ccswitch' or 'tokensbuddy', got '{scheme}'"
         )));
     }
 

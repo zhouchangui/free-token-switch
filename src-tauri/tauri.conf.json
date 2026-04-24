@@ -56,7 +56,7 @@
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["tokensbuddy"]
+        "schemes": ["ccswitch", "tokensbuddy"]
       }
     }
   }

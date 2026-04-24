@@ -25,6 +25,16 @@ interface DeeplinkError {
   error: string;
 }
 
+export function resolveSharedProviderModelSelection(
+  models: FetchedModel[],
+  requestedModel?: string,
+): string {
+  if (requestedModel && models.some((model) => model.id === requestedModel)) {
+    return requestedModel;
+  }
+  return models[0]?.id ?? "";
+}
+
 export function DeepLinkImportDialog() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -104,7 +114,10 @@ export function DeepLinkImportDialog() {
   useEffect(() => {
     const handlePaste = async (event: ClipboardEvent) => {
       const text = event.clipboardData?.getData("text")?.trim();
-      if (!text || !text.startsWith("ccswitch://")) {
+      if (
+        !text ||
+        (!text.startsWith("ccswitch://") && !text.startsWith("tokensbuddy://"))
+      ) {
         return;
       }
 
@@ -172,11 +185,9 @@ export function DeepLinkImportDialog() {
         }
 
         setSharedModels(models);
-        const preferred =
-          request.model && models.some((m) => m.id === request.model)
-            ? request.model
-            : "";
-        setSelectedSharedModel(preferred);
+        setSelectedSharedModel(
+          resolveSharedProviderModelSelection(models, request.model),
+        );
       })
       .catch((error) => {
         if (cancelled) return;
