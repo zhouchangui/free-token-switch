@@ -130,9 +130,38 @@ export interface ProviderSellerConfig {
   lastPublishedAt?: number | null;
 }
 
+export type ProviderShareStatus = "idle" | "starting" | "running" | "error";
+
+export interface ProviderFriendShareConfig {
+  enabled: boolean;
+  status: ProviderShareStatus;
+  endpoint?: string;
+  accessToken?: string;
+  startedAt?: number;
+  lastError?: string | null;
+}
+
+export interface ProviderMarketShareConfig {
+  enabled: boolean;
+  status: ProviderShareStatus;
+  pricingStrategy: "provider" | "custom";
+  pricePer1kTokens?: number;
+  endpoint?: string;
+  accessToken?: string;
+  startedAt?: number;
+  lastPublishedAt?: number | null;
+  lastError?: string | null;
+}
+
+export interface ProviderShareConfig {
+  friend: ProviderFriendShareConfig;
+  market: ProviderMarketShareConfig;
+}
+
 // 供应商元数据（字段名与后端一致，保持 snake_case）
 export interface ProviderMeta {
   sellerConfig?: ProviderSellerConfig;
+  shareConfig?: ProviderShareConfig;
   // 自定义端点：以 URL 为键，值为端点信息
   custom_endpoints?: Record<string, CustomEndpoint>;
   // 是否在切换/同步到 live 时应用通用配置片段

@@ -5,10 +5,14 @@ import type {
   DraggableAttributes,
   DraggableSyntheticListeners,
 } from "@dnd-kit/core";
-import type { Provider, ProviderSellerConfig } from "@/types";
+import type {
+  Provider,
+  ProviderShareConfig,
+} from "@/types";
 import type { AppId } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { ProviderActions } from "@/components/providers/ProviderActions";
+import { extractProviderDisplayUrl } from "@/components/providers/providerDisplayUtils";
 import { ProviderIcon } from "@/components/ProviderIcon";
 import UsageFooter from "@/components/UsageFooter";
 import SubscriptionQuotaFooter from "@/components/SubscriptionQuotaFooter";
@@ -18,7 +22,6 @@ import { PROVIDER_TYPES } from "@/config/constants";
 import { isHermesReadOnlyProvider } from "@/config/hermesProviderPresets";
 import { ProviderHealthBadge } from "@/components/providers/ProviderHealthBadge";
 import { FailoverPriorityBadge } from "@/components/providers/FailoverPriorityBadge";
-import { extractCodexBaseUrl } from "@/utils/providerConfigUtils";
 import { useProviderHealth } from "@/lib/query/failover";
 import { useUsageQuery } from "@/lib/query/queries";
 
@@ -58,9 +61,9 @@ interface ProviderCardProps {
   // OpenClaw: default model
   isDefaultModel?: boolean;
   onSetAsDefault?: () => void;
-  onSaveSellerConfig?: (
+  onSaveShareConfig?: (
     provider: Provider,
-    config: ProviderSellerConfig,
+    config: ProviderShareConfig,
   ) => Promise<void> | void;
 }
 
@@ -87,38 +90,6 @@ function isOfficialProvider(provider: Provider, appId: AppId): boolean {
   }
   return false;
 }
-
-const extractApiUrl = (provider: Provider, fallbackText: string) => {
-  if (provider.notes?.trim()) {
-    return provider.notes.trim();
-  }
-
-  if (provider.websiteUrl) {
-    return provider.websiteUrl;
-  }
-
-  const config = provider.settingsConfig;
-
-  if (config && typeof config === "object") {
-    const envBase =
-      (config as Record<string, any>)?.env?.ANTHROPIC_BASE_URL ||
-      (config as Record<string, any>)?.env?.GOOGLE_GEMINI_BASE_URL;
-    if (typeof envBase === "string" && envBase.trim()) {
-      return envBase;
-    }
-
-    const baseUrl = (config as Record<string, any>)?.config;
-
-    if (typeof baseUrl === "string" && baseUrl.includes("base_url")) {
-      const extractedBaseUrl = extractCodexBaseUrl(baseUrl);
-      if (extractedBaseUrl) {
-        return extractedBaseUrl;
-      }
-    }
-  }
-
-  return fallbackText;
-};
 
 export function ProviderCard({
   provider,
@@ -150,7 +121,7 @@ export function ProviderCard({
   // OpenClaw: default model
   isDefaultModel,
   onSetAsDefault,
-  onSaveSellerConfig,
+  onSaveShareConfig,
 }: ProviderCardProps) {
   const { t } = useTranslation();
 
@@ -166,7 +137,7 @@ export function ProviderCard({
   });
 
   const displayUrl = useMemo(() => {
-    return extractApiUrl(provider, fallbackUrlText);
+    return extractProviderDisplayUrl(provider, fallbackUrlText);
   }, [provider, fallbackUrlText]);
 
   const isClickableUrl = useMemo(() => {
@@ -483,12 +454,10 @@ export function ProviderCard({
               // OpenClaw: default model
               isDefaultModel={isDefaultModel}
               onSetAsDefault={onSetAsDefault}
-              providerId={provider.id}
-              providerName={provider.name}
-              sellerConfig={provider.meta?.sellerConfig}
-              onSaveSellerConfig={
-                onSaveSellerConfig
-                  ? (config) => onSaveSellerConfig(provider, config)
+              provider={provider}
+              onSaveShareConfig={
+                onSaveShareConfig
+                  ? (config) => onSaveShareConfig(provider, config)
                   : undefined
               }
             />

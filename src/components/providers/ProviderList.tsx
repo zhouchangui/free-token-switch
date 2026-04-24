@@ -17,7 +17,7 @@ import { Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Provider, ProviderSellerConfig } from "@/types";
+import type { Provider, ProviderShareConfig } from "@/types";
 import type { AppId } from "@/lib/api";
 import { providersApi } from "@/lib/api/providers";
 import { useDragSort } from "@/hooks/useDragSort";
@@ -60,9 +60,9 @@ interface ProviderListProps {
   onDisableOmoSlim?: () => void;
   onDuplicate: (provider: Provider) => void;
   onConfigureUsage?: (provider: Provider) => void;
-  onSaveSellerConfig?: (
+  onSaveShareConfig?: (
     provider: Provider,
-    config: ProviderSellerConfig,
+    config: ProviderShareConfig,
   ) => Promise<void> | void;
   onOpenWebsite: (url: string) => void;
   onOpenTerminal?: (provider: Provider) => void;
@@ -86,7 +86,7 @@ export function ProviderList({
   onDisableOmoSlim,
   onDuplicate,
   onConfigureUsage,
-  onSaveSellerConfig,
+  onSaveShareConfig,
   onOpenWebsite,
   onOpenTerminal,
   onCreate,
@@ -373,7 +373,7 @@ export function ProviderList({
                 onDisableOmoSlim={onDisableOmoSlim}
                 onDuplicate={onDuplicate}
                 onConfigureUsage={onConfigureUsage}
-                onSaveSellerConfig={onSaveSellerConfig}
+                onSaveShareConfig={onSaveShareConfig}
                 onOpenWebsite={onOpenWebsite}
                 onOpenTerminal={onOpenTerminal}
                 onTest={handleTest}
@@ -511,9 +511,9 @@ interface SortableProviderCardProps {
   onDisableOmoSlim?: () => void;
   onDuplicate: (provider: Provider) => void;
   onConfigureUsage?: (provider: Provider) => void;
-  onSaveSellerConfig?: (
+  onSaveShareConfig?: (
     provider: Provider,
-    config: ProviderSellerConfig,
+    config: ProviderShareConfig,
   ) => Promise<void> | void;
   onOpenWebsite: (url: string) => void;
   onOpenTerminal?: (provider: Provider) => void;
@@ -546,7 +546,7 @@ function SortableProviderCard({
   onDisableOmoSlim,
   onDuplicate,
   onConfigureUsage,
-  onSaveSellerConfig,
+  onSaveShareConfig,
   onOpenWebsite,
   onOpenTerminal,
   onTest,
@@ -594,7 +594,7 @@ function SortableProviderCard({
         onConfigureUsage={
           onConfigureUsage ? (item) => onConfigureUsage(item) : () => undefined
         }
-        onSaveSellerConfig={onSaveSellerConfig}
+        onSaveShareConfig={onSaveShareConfig}
         onOpenWebsite={onOpenWebsite}
         onOpenTerminal={onOpenTerminal}
         onTest={onTest}

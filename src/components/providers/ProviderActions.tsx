@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   BarChart3,
   Check,
@@ -8,6 +9,7 @@ import {
   Play,
   Plus,
   ShieldAlert,
+  Store,
   Terminal,
   TestTube2,
   Trash2,
@@ -15,10 +17,10 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { ProviderSellerPopover } from "@/components/providers/ProviderSellerPopover";
+import { ProviderShareSettingsDialog } from "@/components/providers/ProviderShareSettingsDialog";
 import { cn } from "@/lib/utils";
 import type { AppId } from "@/lib/api";
-import type { ProviderSellerConfig } from "@/types";
+import type { Provider, ProviderShareConfig } from "@/types";
 
 interface ProviderActionsProps {
   appId?: AppId;
@@ -45,10 +47,8 @@ interface ProviderActionsProps {
   // OpenClaw: default model
   isDefaultModel?: boolean;
   onSetAsDefault?: () => void;
-  providerId?: string;
-  providerName?: string;
-  sellerConfig?: ProviderSellerConfig;
-  onSaveSellerConfig?: (config: ProviderSellerConfig) => Promise<void> | void;
+  provider?: Provider;
+  onSaveShareConfig?: (config: ProviderShareConfig) => Promise<void> | void;
 }
 
 export function ProviderActions({
@@ -75,12 +75,11 @@ export function ProviderActions({
   // OpenClaw: default model
   isDefaultModel = false,
   onSetAsDefault,
-  providerId,
-  providerName,
-  sellerConfig,
-  onSaveSellerConfig,
+  onSaveShareConfig,
+  provider,
 }: ProviderActionsProps) {
   const { t } = useTranslation();
+  const [isShareSettingsOpen, setIsShareSettingsOpen] = useState(false);
   const iconButtonClass = "h-8 w-8 p-1";
 
   // 累加模式应用（OpenCode 非 OMO / OpenClaw / Hermes）
@@ -325,13 +324,30 @@ export function ProviderActions({
           <BarChart3 className="h-4 w-4" />
         </Button>
 
-        {providerId && providerName && onSaveSellerConfig && (
-          <ProviderSellerPopover
-            providerId={providerId}
-            providerName={providerName}
-            sellerConfig={sellerConfig}
-            onSave={onSaveSellerConfig}
-          />
+        {provider && onSaveShareConfig && (
+          <>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setIsShareSettingsOpen(true)}
+              title={t("provider.shareSettings", {
+                defaultValue: "分享设置",
+              })}
+              aria-label={t("provider.shareSettings", {
+                defaultValue: "分享设置",
+              })}
+              className={iconButtonClass}
+            >
+              <Store className="h-4 w-4" />
+            </Button>
+            <ProviderShareSettingsDialog
+              appId={appId ?? "claude"}
+              provider={provider}
+              open={isShareSettingsOpen}
+              onOpenChange={setIsShareSettingsOpen}
+              onSaveShareConfig={onSaveShareConfig}
+            />
+          </>
         )}
 
         {onOpenTerminal && (

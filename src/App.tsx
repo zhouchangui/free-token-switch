@@ -293,7 +293,7 @@ function App() {
     switchProvider,
     deleteProvider,
     saveUsageScript,
-    updateSellerConfig,
+    updateShareConfig,
     setAsDefaultModel,
   } = useProviderActions(
     activeApp,
@@ -1018,7 +1018,7 @@ function App() {
                       }
                       onDuplicate={handleDuplicateProvider}
                       onConfigureUsage={setUsageProvider}
-                      onSaveSellerConfig={updateSellerConfig}
+                      onSaveShareConfig={updateShareConfig}
                       onOpenWebsite={handleOpenWebsite}
                       onOpenTerminal={
                         activeApp === "claude" ? handleOpenTerminal : undefined

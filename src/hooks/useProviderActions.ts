@@ -6,6 +6,7 @@ import { providersApi, settingsApi, openclawApi, type AppId } from "@/lib/api";
 import type {
   Provider,
   ProviderSellerConfig,
+  ProviderShareConfig,
   UsageScript,
   OpenClawProviderConfig,
   OpenClawDefaultModel,
@@ -307,6 +308,19 @@ export function useProviderActions(
     [updateProvider],
   );
 
+  const updateShareConfig = useCallback(
+    async (provider: Provider, shareConfig: ProviderShareConfig) => {
+      await updateProvider({
+        ...provider,
+        meta: {
+          ...provider.meta,
+          shareConfig,
+        },
+      });
+    },
+    [updateProvider],
+  );
+
   // Set provider as default model (OpenClaw only)
   const setAsDefaultModel = useCallback(
     async (provider: Provider) => {
@@ -358,6 +372,7 @@ export function useProviderActions(
     deleteProvider,
     saveUsageScript,
     updateSellerConfig,
+    updateShareConfig,
     setAsDefaultModel,
     isLoading:
       addProviderMutation.isPending ||
