@@ -55,7 +55,7 @@ export function buildSharedProviderLink(input: {
     params.set("model", input.recommendedModel);
   }
 
-  return `ccswitch://v1/import?${params.toString()}`;
+  return `tokensbuddy://v1/import?${params.toString()}`;
 }
 
 async function ensureShareEndpointAndToken(input: {

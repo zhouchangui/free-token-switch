@@ -60,7 +60,7 @@ function Navbar() {
             {i18n.language === 'zh' ? 'EN' : '中文'}
           </button>
           <a
-            href="https://github.com/farion1231/tokens-buddy"
+            href="https://github.com/zhouchangui/tokens-buddy"
             target="_blank"
             rel="noreferrer"
             className="font-mono text-xs text-cyan-500/70 hover:text-cyan-400 transition-colors flex items-center gap-2"
@@ -119,21 +119,21 @@ function Hero() {
       >
         <div className="flex flex-wrap justify-center gap-4 text-balance">
           <a
-            href="https://github.com/farion1231/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_universal.dmg"
+            href="https://github.com/zhouchangui/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_universal.dmg"
             className="group flex items-center gap-3 h-14 px-8 bg-white text-black font-bold transition-all hover:bg-cyan-400 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
           >
             <Download className="w-4 h-4" />
             {t('hero.downloadMac')}
           </a>
           <a
-            href="https://github.com/farion1231/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_x64-setup.exe"
+            href="https://github.com/zhouchangui/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_x64-setup.exe"
             className="group flex items-center gap-3 h-14 px-8 bg-black border border-cyan-500/40 text-cyan-400 hover:bg-cyan-950/30 hover:border-cyan-400 transition-all"
           >
             <Monitor className="w-4 h-4" />
             {t('hero.downloadWin')}
           </a>
           <a
-            href="https://github.com/farion1231/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_amd64.AppImage"
+            href="https://github.com/zhouchangui/tokens-buddy/releases/download/v3.15.6/TokensBuddy_3.15.6_amd64.AppImage"
             className="group flex items-center gap-3 h-14 px-8 bg-black border border-emerald-500/40 text-emerald-400 hover:bg-emerald-950/30 hover:border-emerald-400 transition-all"
           >
             <Zap className="w-4 h-4" />
@@ -339,7 +339,7 @@ function CTA() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <a
-            href="https://github.com/zhouchangui/free-token-switch/releases/tag/v3.15.6"
+            href="https://github.com/zhouchangui/tokens-buddy/releases/tag/v3.15.6"
             target="_blank"
             rel="noreferrer"
             className="group relative inline-flex items-center justify-center gap-2 h-14 px-10 bg-cyan-500 text-black font-mono font-bold uppercase tracking-widest transition-all hover:bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.4)]"
@@ -367,12 +367,12 @@ function Footer() {
         </div>
         <p className="text-zinc-600 font-mono text-[10px] uppercase tracking-widest">
           {t('footer.fork')} 
-          <a href="https://github.com/farion1231/tokens-buddy" target="_blank" rel="noreferrer" className="text-cyan-500/70 hover:text-cyan-400 ml-2">TOKENS-BUDDY</a>
+          <a href="https://github.com/zhouchangui/tokens-buddy" target="_blank" rel="noreferrer" className="text-cyan-500/70 hover:text-cyan-400 ml-2">TOKENS-BUDDY</a>
           <br className="md:hidden"/> // MIT_LICENSE // OPEN_SOURCE
         </p>
         <div className="flex gap-4">
           <a
-            href="https://github.com/farion1231/tokens-buddy"
+            href="https://github.com/zhouchangui/tokens-buddy"
             target="_blank"
             rel="noreferrer"
             className="w-10 h-10 border border-cyan-900 bg-cyan-950/20 hover:bg-cyan-900/50 hover:border-cyan-500 flex items-center justify-center text-cyan-500 transition-all"

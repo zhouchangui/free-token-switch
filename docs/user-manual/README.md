@@ -18,5 +18,5 @@
 
 ## Links
 
-- [GitHub Issues](https://github.com/farion1231/tokens-buddy/issues)
-- [GitHub Repository](https://github.com/farion1231/tokens-buddy)
+- [GitHub Issues](https://github.com/zhouchangui/tokens-buddy/issues)
+- [GitHub Repository](https://github.com/zhouchangui/tokens-buddy)

@@ -75,7 +75,7 @@ export type ImportResult =
 export const deeplinkApi = {
   /**
    * Parse a deep link URL
-   * @param url The ccswitch:// or tokensbuddy:// URL to parse
+   * @param url The tokensbuddy:// URL to parse; legacy ccswitch:// URLs are also accepted
    * @returns Parsed deep link request
    */
   parseDeeplink: async (url: string): Promise<DeepLinkImportRequest> => {

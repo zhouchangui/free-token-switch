@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-23
 
-**Goal:** 为卖家分享场景增加“复制分享链接”能力，生成可被 CC Switch 自动识别的 `ccswitch://` provider 导入链接；接收方打开后先弹确认框，再从分享接口拉取模型列表，用户选择模型后导入为列表中的专用共享 provider。
+**Goal:** 为卖家分享场景增加“复制分享链接”能力，生成可被 TokensBuddy 自动识别的 `tokensbuddy://` provider 导入链接；接收方打开后先弹确认框，再从分享接口拉取模型列表，用户选择模型后导入为列表中的专用共享 provider。
 
 ## Context
 
@@ -10,7 +10,7 @@
 
 - 卖家弹层 `ProviderSellerPopover`
 - 卖家 token / 公网地址生成与持久化
-- 现有 `ccswitch://v1/import?resource=provider...` deep link 解析与确认弹窗
+- 现有 `tokensbuddy://v1/import?resource=provider...` deep link 解析与确认弹窗
 - provider 导入与持久化链路
 
 当前缺口：
@@ -21,7 +21,7 @@
 
 ## User Requirements
 
-- 协议继续使用 `ccswitch://...`
+- 协议继续使用 `tokensbuddy://...`
 - 需要一个按钮复制公网地址和 token 信息
 - 需要一个按钮生成分享链接
 - 链接内直接带导入需要的信息
@@ -38,7 +38,7 @@
 
 原因：
 
-- 最大程度复用现有 `ccswitch://` 解析、事件、确认框与导入逻辑
+- 最大程度复用现有 `tokensbuddy://` 解析、事件、确认框与导入逻辑
 - 实现成本和风险最低
 - 分享 provider 与普通 provider 的差异，主要是“导入前要做模型拉取校验”和“默认不启用”，不值得重造协议
 
@@ -47,7 +47,7 @@
 分享按钮生成的链接仍使用：
 
 ```text
-ccswitch://v1/import?resource=provider&...
+tokensbuddy://v1/import?resource=provider&...
 ```
 
 新增 / 约定字段：
@@ -85,7 +85,7 @@ ccswitch://v1/import?resource=provider&...
 
 - 若 `endpoint` 或 `accessToken` 缺失，则禁用复制分享链接按钮
 - “复制公网地址和令牌”复制结构化文本，方便手工分享
-- “复制分享链接”直接复制完整 `ccswitch://...` URL
+- “复制分享链接”直接复制完整 `tokensbuddy://...` URL
 
 ## Import Confirmation Flow
 
@@ -166,7 +166,7 @@ ccswitch://v1/import?resource=provider&...
 ### Frontend
 
 - 卖家弹层在 `endpoint + accessToken` 存在时显示分享链接按钮
-- 复制分享链接生成正确的 `ccswitch://...` URL
+- 复制分享链接生成正确的 `tokensbuddy://...` URL
 - 共享 provider 确认框会触发模型拉取
 - 模型拉取失败时阻止导入
 - 模型只能从列表中选择
@@ -179,7 +179,7 @@ ccswitch://v1/import?resource=provider&...
 
 ## Open Decisions Resolved
 
-- 协议名：继续使用 `ccswitch://`
+- 协议名：继续使用 `tokensbuddy://`
 - 导入后行为：只加入列表，不自动启用
 - 模型策略：推荐模型默认写入，但用户可改
 - 模型输入限制：只能从拉取列表中选择

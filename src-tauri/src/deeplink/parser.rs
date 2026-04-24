@@ -13,7 +13,7 @@ const SUPPORTED_SCHEMES: &[&str] = &["ccswitch", "tokensbuddy"];
 /// Parse a ccswitch:// or tokensbuddy:// URL into a DeepLinkImportRequest
 ///
 /// Expected format:
-/// ccswitch://v1/import?resource={type}&...
+/// tokensbuddy://v1/import?resource={type}&...
 pub fn parse_deeplink_url(url_str: &str) -> Result<DeepLinkImportRequest, AppError> {
     // Parse URL
     let url = Url::parse(url_str)

@@ -1,4 +1,4 @@
-//! Deep link import functionality for CC Switch
+//! Deep link import functionality for TokensBuddy
 //!
 //! This module implements the tokensbuddy:// protocol for importing configurations
 //! via deep links. Supports importing:

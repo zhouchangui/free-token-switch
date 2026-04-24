@@ -4,8 +4,8 @@
 
 ### Share and Monetize Your Unused API Tokens - Let Your API Value Flow
 
-[![Version](https://img.shields.io/github/v/release/farion1231/tokens-buddy?color=blue&label=version)](https://github.com/farion1231/tokens-buddy/releases)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/farion1231/tokens-buddy/releases)
+[![Version](https://img.shields.io/github/v/release/zhouchangui/tokens-buddy?color=blue&label=version)](https://github.com/zhouchangui/tokens-buddy/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/zhouchangui/tokens-buddy/releases)
 [![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%202-orange.svg)](https://tauri.app/)
 [![Website](https://img.shields.io/badge/website-tokensbuddy.com-blue)](https://tokensbuddy.com)
 
@@ -52,7 +52,7 @@ MiniMax M2.7 is MiniMax's first model deeply involved in self-iteration, showing
 ## 🚀 Quick Start
 
 ### 1. Download & Install
-Go to [Releases](https://github.com/farion1231/tokens-buddy/releases) to download the installer for your platform.
+Go to [Releases](https://github.com/zhouchangui/tokens-buddy/releases) to download the installer for your platform.
 
 ### 2. Configure Tokens
 Add your API keys in the app; multiple provider presets are supported.

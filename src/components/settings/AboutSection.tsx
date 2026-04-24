@@ -241,13 +241,13 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
 
       if (!displayVersion) {
         await settingsApi.openExternal(
-          "https://github.com/farion1231/tokens-buddy/releases",
+          "https://github.com/zhouchangui/tokens-buddy/releases",
         );
         return;
       }
 
       await settingsApi.openExternal(
-        `https://github.com/farion1231/tokens-buddy/releases/tag/${displayVersion}`,
+        `https://github.com/zhouchangui/tokens-buddy/releases/tag/${displayVersion}`,
       );
     } catch (error) {
       console.error("[AboutSection] Failed to open release notes", error);

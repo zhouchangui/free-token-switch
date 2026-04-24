@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a seller-side share link button that generates a `ccswitch://` provider import URL, then let recipients confirm import, fetch/select models, and add the shared provider to their list without auto-enabling it.
+**Goal:** Add a seller-side share link button that generates a `tokensbuddy://` provider import URL, then let recipients confirm import, fetch/select models, and add the shared provider to their list without auto-enabling it.
 
 **Architecture:** Reuse the existing `provider` deeplink protocol and import pipeline, extending it with shared-provider fields plus a dedicated confirmation branch in the import dialog. The seller popover generates the share URL from persisted endpoint/token data; the import dialog resolves shared-provider links by fetching models before import, then persists the chosen model into a normal provider import request.
 
@@ -13,7 +13,7 @@
 ## File Structure
 
 - Modify: `src/components/providers/ProviderSellerPopover.tsx`
-  Responsibility: expose share actions and generate a `ccswitch://...` shared-provider link.
+  Responsibility: expose share actions and generate a `tokensbuddy://...` shared-provider link.
 - Modify: `src/components/providers/__tests__/ProviderSellerPopover.test.tsx`
   Responsibility: verify share-link generation and copy behavior without losing existing seller tests.
 - Modify: `src/lib/api/deeplink.ts`
@@ -48,7 +48,7 @@
 ```rust
 #[test]
 fn test_parse_shared_provider_deeplink() {
-    let url = "ccswitch://v1/import?resource=provider&app=claude&name=Shared%20Kimi&endpoint=https%3A%2F%2Fdemo.trycloudflare.com&apiKey=token123&model=kimi-for-coding&providerType=shared_seller&shareMode=free&requiresModelSelection=true&enabled=false";
+    let url = "tokensbuddy://v1/import?resource=provider&app=claude&name=Shared%20Kimi&endpoint=https%3A%2F%2Fdemo.trycloudflare.com&apiKey=token123&model=kimi-for-coding&providerType=shared_seller&shareMode=free&requiresModelSelection=true&enabled=false";
 
     let request = parse_deeplink_url(url).unwrap();
 
@@ -141,7 +141,7 @@ it("copies a shared provider deeplink when endpoint and token exist", async () =
   await user.click(screen.getByRole("button", { name: /copy share link/i }));
 
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-    expect.stringContaining("ccswitch://v1/import?resource=provider"),
+    expect.stringContaining("tokensbuddy://v1/import?resource=provider"),
   );
 });
 ```
@@ -173,7 +173,7 @@ function buildSharedProviderLink(input: {
     requiresModelSelection: "true",
   });
   if (input.recommendedModel) params.set("model", input.recommendedModel);
-  return `ccswitch://v1/import?${params.toString()}`;
+  return `tokensbuddy://v1/import?${params.toString()}`;
 }
 ```
 

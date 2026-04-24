@@ -1204,7 +1204,7 @@ function App() {
                       : "text-blue-500 dark:text-blue-400"
                   )} fill="currentColor" />
                   <a
-                    href="https://github.com/farion1231/tokens-buddy"
+                    href="https://github.com/zhouchangui/tokens-buddy"
                     target="_blank"
                     rel="noreferrer"
                     className={cn(

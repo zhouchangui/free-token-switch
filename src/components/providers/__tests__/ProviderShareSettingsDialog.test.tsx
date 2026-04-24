@@ -113,7 +113,7 @@ describe("buildSharedProviderLink", () => {
       recommendedModel: "kimi-for-coding",
     });
 
-    expect(link).toContain("ccswitch://v1/import?resource=provider");
+    expect(link).toContain("tokensbuddy://v1/import?resource=provider");
     expect(link).toContain("app=codex");
     expect(link).toContain("providerType=shared_seller");
     expect(link).toContain("shareMode=free");

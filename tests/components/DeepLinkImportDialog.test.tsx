@@ -74,7 +74,7 @@ describe("DeepLinkImportDialog", () => {
     fireEvent.paste(window, {
       clipboardData: {
         getData: () =>
-          "ccswitch://v1/import?resource=provider&app=claude&name=Kimi+For+Coding+%28Shared%29",
+          "tokensbuddy://v1/import?resource=provider&app=claude&name=Kimi+For+Coding+%28Shared%29",
       },
     });
 

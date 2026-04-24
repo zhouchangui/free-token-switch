@@ -4,7 +4,7 @@ version = "3.14.0"
 description = "TokensBuddy - Share unused tokens with friends or exchange for money (USTC, JD Clawtip)."
 authors = ["Jason Young"]
 license = "MIT"
-repository = "https://github.com/farion1231/tokens-buddy"
+repository = "https://github.com/zhouchangui/tokens-buddy"
 edition = "2021"
 rust-version = "1.85.0"
 

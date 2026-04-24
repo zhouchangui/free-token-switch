@@ -20,6 +20,6 @@
     <binary>tokens-buddy</binary>
   </provides>
 
-  <url type="homepage">https://github.com/farion1231/tokens-buddy</url>
-  <url type="bugtracker">https://github.com/farion1231/tokens-buddy/issues</url>
+  <url type="homepage">https://github.com/zhouchangui/tokens-buddy</url>
+  <url type="bugtracker">https://github.com/zhouchangui/tokens-buddy/issues</url>
 </component>
