@@ -1,0 +1,45 @@
+[clawtip]
+mode = "production"
+payment_provider = "clawtip"
+pay_to = "env:CLAWTIP_PAY_TO"
+sm4_key_base64 = "env:CLAWTIP_SM4_KEY"
+skill_slug = "tokens-buddy-llm-console"
+skill_id = "si-tokens-buddy-llm-console"
+description = "TokensBuddy LLM console test call"
+resource_url = "http://127.0.0.1:37891"
+order_ttl_seconds = 600
+credential_max_age_seconds = 1800
+
+[seller]
+seller_id = "local-seller"
+listing_id = "local-mock-llm"
+model_id = "mock-llm"
+amount_fen = 1
+capacity = 1
+max_output_tokens = 256
+
+[storage]
+database_path = "~/.tokens-buddy/clawtip-console/clawtip.db"
+market_dir = "~/.tokens-buddy/clawtip-console/market"
+orders_dir = "~/.tokens-buddy/clawtip-console/orders"
+
+[relay]
+enabled = true
+event_kind = 31990
+relays = [
+  "wss://relay.damus.io",
+  "wss://nos.lol"
+]
+private_key = "auto"
+publish_timeout_seconds = 8
+fetch_timeout_seconds = 5
+
+[mock_llm]
+chunk_delay_ms = 120
+input_tokens = 32
+output_tokens = 64
+chunks = [
+  "这是一次模拟 LLM 调用。",
+  "支付凭证已校验通过。",
+  "本次履约完成。"
+]

@@ -1,4 +1,5 @@
 pub mod balance;
+pub mod clawtip;
 pub mod coding_plan;
 pub mod config;
 pub mod env_checker;

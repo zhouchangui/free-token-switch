@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
+    "clawtip:console": "cargo run --manifest-path src-tauri/Cargo.toml --bin clawtip-console",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest watch"
   },
