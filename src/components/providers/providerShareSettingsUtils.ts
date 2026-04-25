@@ -4,6 +4,7 @@ import type {
   ProviderShareStatus,
   ProviderSellerConfig,
 } from "@/types";
+import type { SellerRuntimeStatus } from "@/lib/api/market";
 
 interface ProxyStatusLike {
   running?: boolean;
@@ -13,6 +14,7 @@ interface ProxyStatusLike {
 export interface DeriveShareRuntimeStatsInput {
   shareConfig: ProviderShareConfig;
   proxyStatus?: ProxyStatusLike | null;
+  sellerRuntimeStatus?: SellerRuntimeStatus | null;
   providerTokensSinceStart: number;
 }
 
@@ -34,6 +36,7 @@ const idleShareConfig: ProviderShareConfig = {
     enabled: false,
     status: "idle",
     pricingStrategy: "provider",
+    discountPercent: 100,
     lastError: null,
     lastPublishedAt: null,
   },
@@ -46,8 +49,15 @@ const statusLabels: Record<ProviderShareStatus, string> = {
   idle: "未运行",
 };
 
-export function toProviderShareConfig(meta?: ProviderMeta): ProviderShareConfig {
+export function toProviderShareConfig(
+  meta?: ProviderMeta,
+): ProviderShareConfig {
   const legacyMarketConfig = toMarketConfigFromSellerConfig(meta?.sellerConfig);
+  const marketConfig = {
+    ...idleShareConfig.market,
+    ...legacyMarketConfig,
+    ...meta?.shareConfig?.market,
+  };
 
   return {
     friend: {
@@ -55,11 +65,20 @@ export function toProviderShareConfig(meta?: ProviderMeta): ProviderShareConfig 
       ...meta?.shareConfig?.friend,
     },
     market: {
-      ...idleShareConfig.market,
-      ...legacyMarketConfig,
-      ...meta?.shareConfig?.market,
+      ...marketConfig,
+      discountPercent: normalizeMarketDiscountPercent(
+        marketConfig.discountPercent,
+      ),
     },
   };
+}
+
+export function normalizeMarketDiscountPercent(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 100;
+  }
+
+  return Math.min(100, Math.max(50, Math.round(value / 5) * 5));
 }
 
 export function formatTokenCount(value: number): string {
@@ -73,10 +92,13 @@ export function formatTokenCount(value: number): string {
 export function deriveShareRuntimeStats(
   input: DeriveShareRuntimeStatsInput,
 ): ShareRuntimeStats {
-  const channelStatus = deriveChannelStatus(input.shareConfig);
+  const channelStatus = deriveChannelStatus(
+    input.shareConfig,
+    input.sellerRuntimeStatus,
+  );
   const tokensUsedThisRun = normalizeCount(input.providerTokensSinceStart);
   const activeConnections =
-    input.proxyStatus?.running === true
+    channelStatus === "running" && input.proxyStatus?.running === true
       ? normalizeCount(input.proxyStatus.active_connections ?? 0)
       : 0;
 
@@ -139,10 +161,14 @@ function toShareStatusFromSellerStatus(
 
 function deriveChannelStatus(
   shareConfig: ProviderShareConfig,
+  sellerRuntimeStatus?: SellerRuntimeStatus | null,
 ): ProviderShareStatus {
   const statuses = [shareConfig.friend.status, shareConfig.market.status];
 
   if (statuses.includes("running")) {
+    if (sellerRuntimeStatus && sellerRuntimeStatus.status !== "running") {
+      return statuses.includes("starting") ? "starting" : "idle";
+    }
     return "running";
   }
 

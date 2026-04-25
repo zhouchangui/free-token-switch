@@ -489,372 +489,377 @@ export function DeepLinkImportDialog() {
               {/* Legacy Provider View */}
               {(request.resource === "provider" || !request.resource) &&
                 !isSharedProvider && (
-                <>
-                  {/* Provider Icon - enlarge and center near the top */}
-                  {request.icon && (
-                    <div className="flex justify-center pt-2 pb-1">
-                      <ProviderIcon
-                        icon={request.icon}
-                        name={request.name || request.icon}
-                        size={80}
-                        className="drop-shadow-sm"
-                      />
-                    </div>
-                  )}
+                  <>
+                    {/* Provider Icon - enlarge and center near the top */}
+                    {request.icon && (
+                      <div className="flex justify-center pt-2 pb-1">
+                        <ProviderIcon
+                          icon={request.icon}
+                          name={request.name || request.icon}
+                          size={80}
+                          className="drop-shadow-sm"
+                        />
+                      </div>
+                    )}
 
-                  {/* App Type */}
-                  <div className="grid grid-cols-3 items-center gap-4">
-                    <div className="font-medium text-sm text-muted-foreground">
-                      {t("deeplink.app")}
-                    </div>
-                    <div className="col-span-2 text-sm font-medium capitalize">
-                      {request.app}
-                    </div>
-                  </div>
-
-                  {/* Provider Name */}
-                  <div className="grid grid-cols-3 items-center gap-4">
-                    <div className="font-medium text-sm text-muted-foreground">
-                      {t("deeplink.providerName")}
-                    </div>
-                    <div className="col-span-2 text-sm font-medium">
-                      {request.name}
-                    </div>
-                  </div>
-
-                  {/* Homepage */}
-                  <div className="grid grid-cols-3 items-center gap-4">
-                    <div className="font-medium text-sm text-muted-foreground">
-                      {t("deeplink.homepage")}
-                    </div>
-                    <div className="col-span-2 text-sm break-all text-blue-600 dark:text-blue-400">
-                      {request.homepage}
-                    </div>
-                  </div>
-
-                  {/* API Endpoint */}
-                  <div className="grid grid-cols-3 items-start gap-4">
-                    <div className="font-medium text-sm text-muted-foreground pt-0.5">
-                      {t("deeplink.endpoint")}
-                    </div>
-                    <div className="col-span-2 text-sm break-all space-y-1">
-                      {request.endpoint?.split(",").map((ep, idx) => (
-                        <div
-                          key={idx}
-                          className={
-                            idx === 0 ? "font-medium" : "text-muted-foreground"
-                          }
-                        >
-                          {idx === 0 ? "🔹 " : "└ "}
-                          {ep.trim()}
-                          {idx === 0 && request.endpoint?.includes(",") && (
-                            <span className="text-xs text-muted-foreground ml-2">
-                              ({t("deeplink.primaryEndpoint")})
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* API Key (masked) */}
-                  <div className="grid grid-cols-3 items-center gap-4">
-                    <div className="font-medium text-sm text-muted-foreground">
-                      {t("deeplink.apiKey")}
-                    </div>
-                    <div className="col-span-2 text-sm font-mono text-muted-foreground">
-                      {maskedApiKey}
-                    </div>
-                  </div>
-
-                  {/* Model Fields - 根据应用类型显示不同的模型字段 */}
-                  {request.app === "claude" ? (
-                    <>
-                      {/* Claude 四种模型字段 */}
-                      {request.haikuModel && (
-                        <div className="grid grid-cols-3 items-center gap-4">
-                          <div className="font-medium text-sm text-muted-foreground">
-                            {t("deeplink.haikuModel")}
-                          </div>
-                          <div className="col-span-2 text-sm font-mono">
-                            {request.haikuModel}
-                          </div>
-                        </div>
-                      )}
-                      {request.sonnetModel && (
-                        <div className="grid grid-cols-3 items-center gap-4">
-                          <div className="font-medium text-sm text-muted-foreground">
-                            {t("deeplink.sonnetModel")}
-                          </div>
-                          <div className="col-span-2 text-sm font-mono">
-                            {request.sonnetModel}
-                          </div>
-                        </div>
-                      )}
-                      {request.opusModel && (
-                        <div className="grid grid-cols-3 items-center gap-4">
-                          <div className="font-medium text-sm text-muted-foreground">
-                            {t("deeplink.opusModel")}
-                          </div>
-                          <div className="col-span-2 text-sm font-mono">
-                            {request.opusModel}
-                          </div>
-                        </div>
-                      )}
-                      {request.model && (
-                        <div className="grid grid-cols-3 items-center gap-4">
-                          <div className="font-medium text-sm text-muted-foreground">
-                            {t("deeplink.multiModel")}
-                          </div>
-                          <div className="col-span-2 text-sm font-mono">
-                            {request.model}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {/* Codex 和 Gemini 使用通用 model 字段 */}
-                      {request.model && (
-                        <div className="grid grid-cols-3 items-center gap-4">
-                          <div className="font-medium text-sm text-muted-foreground">
-                            {t("deeplink.model")}
-                          </div>
-                          <div className="col-span-2 text-sm font-mono">
-                            {request.model}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/* Notes (if present) */}
-                  {request.notes && (
-                    <div className="grid grid-cols-3 items-start gap-4">
+                    {/* App Type */}
+                    <div className="grid grid-cols-3 items-center gap-4">
                       <div className="font-medium text-sm text-muted-foreground">
-                        {t("deeplink.notes")}
+                        {t("deeplink.app")}
                       </div>
-                      <div className="col-span-2 text-sm text-muted-foreground">
-                        {request.notes}
+                      <div className="col-span-2 text-sm font-medium capitalize">
+                        {request.app}
                       </div>
                     </div>
-                  )}
 
-                  {/* Config File Details (v3.8+) */}
-                  {hasConfigFile && (
-                    <div className="space-y-3 pt-2 border-t border-border-default">
-                      <div className="grid grid-cols-3 items-center gap-4">
+                    {/* Provider Name */}
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <div className="font-medium text-sm text-muted-foreground">
+                        {t("deeplink.providerName")}
+                      </div>
+                      <div className="col-span-2 text-sm font-medium">
+                        {request.name}
+                      </div>
+                    </div>
+
+                    {/* Homepage */}
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <div className="font-medium text-sm text-muted-foreground">
+                        {t("deeplink.homepage")}
+                      </div>
+                      <div className="col-span-2 text-sm break-all text-blue-600 dark:text-blue-400">
+                        {request.homepage}
+                      </div>
+                    </div>
+
+                    {/* API Endpoint */}
+                    <div className="grid grid-cols-3 items-start gap-4">
+                      <div className="font-medium text-sm text-muted-foreground pt-0.5">
+                        {t("deeplink.endpoint")}
+                      </div>
+                      <div className="col-span-2 text-sm break-all space-y-1">
+                        {request.endpoint?.split(",").map((ep, idx) => (
+                          <div
+                            key={idx}
+                            className={
+                              idx === 0
+                                ? "font-medium"
+                                : "text-muted-foreground"
+                            }
+                          >
+                            {idx === 0 ? "🔹 " : "└ "}
+                            {ep.trim()}
+                            {idx === 0 && request.endpoint?.includes(",") && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                ({t("deeplink.primaryEndpoint")})
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* API Key (masked) */}
+                    <div className="grid grid-cols-3 items-center gap-4">
+                      <div className="font-medium text-sm text-muted-foreground">
+                        {t("deeplink.apiKey")}
+                      </div>
+                      <div className="col-span-2 text-sm font-mono text-muted-foreground">
+                        {maskedApiKey}
+                      </div>
+                    </div>
+
+                    {/* Model Fields - 根据应用类型显示不同的模型字段 */}
+                    {request.app === "claude" ? (
+                      <>
+                        {/* Claude 四种模型字段 */}
+                        {request.haikuModel && (
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <div className="font-medium text-sm text-muted-foreground">
+                              {t("deeplink.haikuModel")}
+                            </div>
+                            <div className="col-span-2 text-sm font-mono">
+                              {request.haikuModel}
+                            </div>
+                          </div>
+                        )}
+                        {request.sonnetModel && (
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <div className="font-medium text-sm text-muted-foreground">
+                              {t("deeplink.sonnetModel")}
+                            </div>
+                            <div className="col-span-2 text-sm font-mono">
+                              {request.sonnetModel}
+                            </div>
+                          </div>
+                        )}
+                        {request.opusModel && (
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <div className="font-medium text-sm text-muted-foreground">
+                              {t("deeplink.opusModel")}
+                            </div>
+                            <div className="col-span-2 text-sm font-mono">
+                              {request.opusModel}
+                            </div>
+                          </div>
+                        )}
+                        {request.model && (
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <div className="font-medium text-sm text-muted-foreground">
+                              {t("deeplink.multiModel")}
+                            </div>
+                            <div className="col-span-2 text-sm font-mono">
+                              {request.model}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {/* Codex 和 Gemini 使用通用 model 字段 */}
+                        {request.model && (
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <div className="font-medium text-sm text-muted-foreground">
+                              {t("deeplink.model")}
+                            </div>
+                            <div className="col-span-2 text-sm font-mono">
+                              {request.model}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Notes (if present) */}
+                    {request.notes && (
+                      <div className="grid grid-cols-3 items-start gap-4">
                         <div className="font-medium text-sm text-muted-foreground">
-                          {t("deeplink.configSource")}
+                          {t("deeplink.notes")}
                         </div>
-                        <div className="col-span-2 text-sm">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
-                            {configSource === "base64"
-                              ? t("deeplink.configEmbedded")
-                              : t("deeplink.configRemote")}
-                          </span>
-                          {request.configFormat && (
-                            <span className="ml-2 text-xs text-muted-foreground uppercase">
-                              {request.configFormat}
-                            </span>
-                          )}
+                        <div className="col-span-2 text-sm text-muted-foreground">
+                          {request.notes}
                         </div>
                       </div>
+                    )}
 
-                      {/* Parsed Config Details */}
-                      {parsedConfig && (
-                        <div className="rounded-lg bg-muted/50 p-3 space-y-2">
-                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                            {t("deeplink.configDetails")}
+                    {/* Config File Details (v3.8+) */}
+                    {hasConfigFile && (
+                      <div className="space-y-3 pt-2 border-t border-border-default">
+                        <div className="grid grid-cols-3 items-center gap-4">
+                          <div className="font-medium text-sm text-muted-foreground">
+                            {t("deeplink.configSource")}
                           </div>
-
-                          {/* Claude config */}
-                          {parsedConfig.type === "claude" &&
-                            parsedConfig.env && (
-                              <div className="space-y-1.5">
-                                {Object.entries(parsedConfig.env).map(
-                                  ([key, value]) => (
-                                    <div
-                                      key={key}
-                                      className="grid grid-cols-2 gap-2 text-xs"
-                                    >
-                                      <span className="font-mono text-muted-foreground truncate">
-                                        {key}
-                                      </span>
-                                      <span className="font-mono truncate">
-                                        {maskValue(key, String(value))}
-                                      </span>
-                                    </div>
-                                  ),
-                                )}
-                              </div>
+                          <div className="col-span-2 text-sm">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                              {configSource === "base64"
+                                ? t("deeplink.configEmbedded")
+                                : t("deeplink.configRemote")}
+                            </span>
+                            {request.configFormat && (
+                              <span className="ml-2 text-xs text-muted-foreground uppercase">
+                                {request.configFormat}
+                              </span>
                             )}
+                          </div>
+                        </div>
 
-                          {/* Codex config */}
-                          {parsedConfig.type === "codex" && (
-                            <div className="space-y-2">
-                              {parsedConfig.auth &&
-                                Object.keys(parsedConfig.auth).length > 0 && (
-                                  <div className="space-y-1.5">
-                                    <div className="text-xs text-muted-foreground">
-                                      Auth:
-                                    </div>
-                                    {Object.entries(parsedConfig.auth).map(
-                                      ([key, value]) => (
-                                        <div
-                                          key={key}
-                                          className="grid grid-cols-2 gap-2 text-xs pl-2"
-                                        >
-                                          <span className="font-mono text-muted-foreground truncate">
-                                            {key}
-                                          </span>
-                                          <span className="font-mono truncate">
-                                            {maskValue(key, String(value))}
-                                          </span>
-                                        </div>
-                                      ),
-                                    )}
-                                  </div>
-                                )}
-                              {parsedConfig.tomlConfig && (
-                                <div className="space-y-1">
-                                  <div className="text-xs text-muted-foreground">
-                                    TOML Config:
-                                  </div>
-                                  <pre className="text-xs font-mono bg-background p-2 rounded overflow-x-auto max-h-24 whitespace-pre-wrap">
-                                    {parsedConfig.tomlConfig.substring(0, 300)}
-                                    {parsedConfig.tomlConfig.length > 300 &&
-                                      "..."}
-                                  </pre>
+                        {/* Parsed Config Details */}
+                        {parsedConfig && (
+                          <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              {t("deeplink.configDetails")}
+                            </div>
+
+                            {/* Claude config */}
+                            {parsedConfig.type === "claude" &&
+                              parsedConfig.env && (
+                                <div className="space-y-1.5">
+                                  {Object.entries(parsedConfig.env).map(
+                                    ([key, value]) => (
+                                      <div
+                                        key={key}
+                                        className="grid grid-cols-2 gap-2 text-xs"
+                                      >
+                                        <span className="font-mono text-muted-foreground truncate">
+                                          {key}
+                                        </span>
+                                        <span className="font-mono truncate">
+                                          {maskValue(key, String(value))}
+                                        </span>
+                                      </div>
+                                    ),
+                                  )}
                                 </div>
                               )}
-                            </div>
-                          )}
 
-                          {/* Gemini config */}
-                          {parsedConfig.type === "gemini" &&
-                            parsedConfig.env && (
-                              <div className="space-y-1.5">
-                                {Object.entries(parsedConfig.env).map(
-                                  ([key, value]) => (
-                                    <div
-                                      key={key}
-                                      className="grid grid-cols-2 gap-2 text-xs"
-                                    >
-                                      <span className="font-mono text-muted-foreground truncate">
-                                        {key}
-                                      </span>
-                                      <span className="font-mono truncate">
-                                        {maskValue(key, String(value))}
-                                      </span>
+                            {/* Codex config */}
+                            {parsedConfig.type === "codex" && (
+                              <div className="space-y-2">
+                                {parsedConfig.auth &&
+                                  Object.keys(parsedConfig.auth).length > 0 && (
+                                    <div className="space-y-1.5">
+                                      <div className="text-xs text-muted-foreground">
+                                        Auth:
+                                      </div>
+                                      {Object.entries(parsedConfig.auth).map(
+                                        ([key, value]) => (
+                                          <div
+                                            key={key}
+                                            className="grid grid-cols-2 gap-2 text-xs pl-2"
+                                          >
+                                            <span className="font-mono text-muted-foreground truncate">
+                                              {key}
+                                            </span>
+                                            <span className="font-mono truncate">
+                                              {maskValue(key, String(value))}
+                                            </span>
+                                          </div>
+                                        ),
+                                      )}
                                     </div>
-                                  ),
+                                  )}
+                                {parsedConfig.tomlConfig && (
+                                  <div className="space-y-1">
+                                    <div className="text-xs text-muted-foreground">
+                                      TOML Config:
+                                    </div>
+                                    <pre className="text-xs font-mono bg-background p-2 rounded overflow-x-auto max-h-24 whitespace-pre-wrap">
+                                      {parsedConfig.tomlConfig.substring(
+                                        0,
+                                        300,
+                                      )}
+                                      {parsedConfig.tomlConfig.length > 300 &&
+                                        "..."}
+                                    </pre>
+                                  </div>
                                 )}
                               </div>
                             )}
-                        </div>
-                      )}
 
-                      {/* Config URL (if remote) */}
-                      {request.configUrl && (
+                            {/* Gemini config */}
+                            {parsedConfig.type === "gemini" &&
+                              parsedConfig.env && (
+                                <div className="space-y-1.5">
+                                  {Object.entries(parsedConfig.env).map(
+                                    ([key, value]) => (
+                                      <div
+                                        key={key}
+                                        className="grid grid-cols-2 gap-2 text-xs"
+                                      >
+                                        <span className="font-mono text-muted-foreground truncate">
+                                          {key}
+                                        </span>
+                                        <span className="font-mono truncate">
+                                          {maskValue(key, String(value))}
+                                        </span>
+                                      </div>
+                                    ),
+                                  )}
+                                </div>
+                              )}
+                          </div>
+                        )}
+
+                        {/* Config URL (if remote) */}
+                        {request.configUrl && (
+                          <div className="grid grid-cols-3 items-center gap-4">
+                            <div className="font-medium text-sm text-muted-foreground">
+                              {t("deeplink.configUrl")}
+                            </div>
+                            <div className="col-span-2 text-sm font-mono text-muted-foreground break-all">
+                              {request.configUrl}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Usage Script Configuration (v3.9+) */}
+                    {request.usageScript && (
+                      <div className="space-y-3 pt-2 border-t border-border-default">
                         <div className="grid grid-cols-3 items-center gap-4">
                           <div className="font-medium text-sm text-muted-foreground">
-                            {t("deeplink.configUrl")}
+                            {t("deeplink.usageScript", {
+                              defaultValue: "用量查询",
+                            })}
                           </div>
-                          <div className="col-span-2 text-sm font-mono text-muted-foreground break-all">
-                            {request.configUrl}
+                          <div className="col-span-2 text-sm">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
+                                request.usageEnabled !== false
+                                  ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                              }`}
+                            >
+                              {request.usageEnabled !== false
+                                ? t("deeplink.usageScriptEnabled", {
+                                    defaultValue: "已启用",
+                                  })
+                                : t("deeplink.usageScriptDisabled", {
+                                    defaultValue: "未启用",
+                                  })}
+                            </span>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  )}
 
-                  {/* Usage Script Configuration (v3.9+) */}
-                  {request.usageScript && (
-                    <div className="space-y-3 pt-2 border-t border-border-default">
-                      <div className="grid grid-cols-3 items-center gap-4">
-                        <div className="font-medium text-sm text-muted-foreground">
-                          {t("deeplink.usageScript", {
-                            defaultValue: "用量查询",
-                          })}
-                        </div>
-                        <div className="col-span-2 text-sm">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
-                              request.usageEnabled !== false
-                                ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-                                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                            }`}
-                          >
-                            {request.usageEnabled !== false
-                              ? t("deeplink.usageScriptEnabled", {
-                                  defaultValue: "已启用",
-                                })
-                              : t("deeplink.usageScriptDisabled", {
-                                  defaultValue: "未启用",
+                        {/* Usage API Key (if different from provider) */}
+                        {request.usageApiKey &&
+                          request.usageApiKey !== request.apiKey && (
+                            <div className="grid grid-cols-3 items-center gap-4">
+                              <div className="font-medium text-sm text-muted-foreground">
+                                {t("deeplink.usageApiKey", {
+                                  defaultValue: "用量 API Key",
                                 })}
-                          </span>
-                        </div>
+                              </div>
+                              <div className="col-span-2 text-sm font-mono text-muted-foreground">
+                                {request.usageApiKey.length > 4
+                                  ? `${request.usageApiKey.substring(0, 4)}${"*".repeat(12)}`
+                                  : "****"}
+                              </div>
+                            </div>
+                          )}
+
+                        {/* Usage Base URL (if different from provider) */}
+                        {request.usageBaseUrl &&
+                          request.usageBaseUrl !== request.endpoint && (
+                            <div className="grid grid-cols-3 items-center gap-4">
+                              <div className="font-medium text-sm text-muted-foreground">
+                                {t("deeplink.usageBaseUrl", {
+                                  defaultValue: "用量查询地址",
+                                })}
+                              </div>
+                              <div className="col-span-2 text-sm break-all">
+                                {request.usageBaseUrl}
+                              </div>
+                            </div>
+                          )}
+
+                        {/* Auto Query Interval */}
+                        {request.usageAutoInterval &&
+                          request.usageAutoInterval > 0 && (
+                            <div className="grid grid-cols-3 items-center gap-4">
+                              <div className="font-medium text-sm text-muted-foreground">
+                                {t("deeplink.usageAutoInterval", {
+                                  defaultValue: "自动查询",
+                                })}
+                              </div>
+                              <div className="col-span-2 text-sm">
+                                {t("deeplink.usageAutoIntervalValue", {
+                                  defaultValue: "每 {{minutes}} 分钟",
+                                  minutes: request.usageAutoInterval,
+                                })}
+                              </div>
+                            </div>
+                          )}
                       </div>
+                    )}
 
-                      {/* Usage API Key (if different from provider) */}
-                      {request.usageApiKey &&
-                        request.usageApiKey !== request.apiKey && (
-                          <div className="grid grid-cols-3 items-center gap-4">
-                            <div className="font-medium text-sm text-muted-foreground">
-                              {t("deeplink.usageApiKey", {
-                                defaultValue: "用量 API Key",
-                              })}
-                            </div>
-                            <div className="col-span-2 text-sm font-mono text-muted-foreground">
-                              {request.usageApiKey.length > 4
-                                ? `${request.usageApiKey.substring(0, 4)}${"*".repeat(12)}`
-                                : "****"}
-                            </div>
-                          </div>
-                        )}
-
-                      {/* Usage Base URL (if different from provider) */}
-                      {request.usageBaseUrl &&
-                        request.usageBaseUrl !== request.endpoint && (
-                          <div className="grid grid-cols-3 items-center gap-4">
-                            <div className="font-medium text-sm text-muted-foreground">
-                              {t("deeplink.usageBaseUrl", {
-                                defaultValue: "用量查询地址",
-                              })}
-                            </div>
-                            <div className="col-span-2 text-sm break-all">
-                              {request.usageBaseUrl}
-                            </div>
-                          </div>
-                        )}
-
-                      {/* Auto Query Interval */}
-                      {request.usageAutoInterval &&
-                        request.usageAutoInterval > 0 && (
-                          <div className="grid grid-cols-3 items-center gap-4">
-                            <div className="font-medium text-sm text-muted-foreground">
-                              {t("deeplink.usageAutoInterval", {
-                                defaultValue: "自动查询",
-                              })}
-                            </div>
-                            <div className="col-span-2 text-sm">
-                              {t("deeplink.usageAutoIntervalValue", {
-                                defaultValue: "每 {{minutes}} 分钟",
-                                minutes: request.usageAutoInterval,
-                              })}
-                            </div>
-                          </div>
-                        )}
+                    {/* Warning */}
+                    <div className="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 p-3 text-sm text-yellow-800 dark:text-yellow-200">
+                      {t("deeplink.warning")}
                     </div>
-                  )}
-
-                  {/* Warning */}
-                  <div className="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 p-3 text-sm text-yellow-800 dark:text-yellow-200">
-                    {t("deeplink.warning")}
-                  </div>
-                </>
-              )}
+                  </>
+                )}
             </div>
 
             <DialogFooter>

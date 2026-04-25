@@ -48,6 +48,7 @@ pub use mcp::{
     sync_single_server_to_codex, sync_single_server_to_gemini,
 };
 pub use provider::{Provider, ProviderMeta};
+pub use services::clawtip;
 pub use services::{
     skill::{migrate_skills_to_ssot, ImportSkillSelection},
     ConfigService, EndpointLatency, McpService, PromptService, ProviderService, ProxyService,
@@ -213,7 +214,7 @@ pub fn run() {
     // 设置 panic hook，在应用崩溃时记录日志到 <app_config_dir>/crash.log（默认 ~/.tokens-buddy/crash.log）
     panic_hook::setup_panic_hook();
 
-    let mut builder = tauri::Builder::default();
+    let builder = tauri::Builder::default();
 
     // NOTE: single-instance temporarily disabled due to zombie processes (PID 7603, 24484)
     // preventing new instance startup. Re-enable after system reboot.
@@ -1103,7 +1104,9 @@ pub fn run() {
             commands::stop_selling_tokens,
             commands::generate_seller_access_token,
             commands::get_suggested_seller_price,
+            commands::get_seller_runtime_status,
             commands::find_ai_sellers,
+            commands::check_cloudflared,
             commands::start_cloudflare_tunnel,
             commands::open_file_dialog,
 

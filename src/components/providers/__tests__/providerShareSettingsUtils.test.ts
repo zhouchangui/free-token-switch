@@ -25,6 +25,7 @@ describe("provider share settings helpers", () => {
       enabled: false,
       status: "idle",
       pricingStrategy: "provider",
+      discountPercent: 100,
       lastError: null,
       lastPublishedAt: null,
     });
@@ -49,6 +50,7 @@ describe("provider share settings helpers", () => {
       status: "running",
       pricingStrategy: "provider",
       pricePer1kTokens: 12,
+      discountPercent: 100,
       endpoint: "https://seller.trycloudflare.com",
       accessToken: "ccs_sell_token",
       startedAt: 1_776_996_815_000,
@@ -117,6 +119,43 @@ describe("provider share settings helpers", () => {
 
     expect(stats.channelStatus).toBe("running");
     expect(stats.channelStatusLabel).toBe("运行中");
+  });
+
+  it("does not report a persisted running channel as running without backend runtime", () => {
+    const stats = deriveShareRuntimeStats({
+      shareConfig: {
+        friend: {
+          enabled: true,
+          status: "running",
+          endpoint: "https://friend.trycloudflare.com",
+          accessToken: "ccs_sell_friend",
+          startedAt: 1_776_996_815_000,
+          lastError: null,
+        },
+        market: {
+          enabled: false,
+          status: "idle",
+          pricingStrategy: "provider",
+          lastError: null,
+          lastPublishedAt: null,
+        },
+      },
+      proxyStatus: {
+        running: true,
+        active_connections: 2,
+      },
+      sellerRuntimeStatus: {
+        providerId: "provider-1",
+        tunnelRunning: false,
+        hasActiveToken: false,
+        status: "idle",
+      },
+      providerTokensSinceStart: 18420,
+    });
+
+    expect(stats.channelStatus).toBe("idle");
+    expect(stats.channelStatusLabel).toBe("未运行");
+    expect(stats.activeConnections).toBe(0);
   });
 
   it("formats token counts as whole numbers", () => {

@@ -5,10 +5,7 @@ import type {
   DraggableAttributes,
   DraggableSyntheticListeners,
 } from "@dnd-kit/core";
-import type {
-  Provider,
-  ProviderShareConfig,
-} from "@/types";
+import type { Provider, ProviderShareConfig } from "@/types";
 import type { AppId } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { ProviderActions } from "@/components/providers/ProviderActions";

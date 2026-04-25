@@ -1,0 +1,109 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">TokensBuddy P2P token economy icon</title>
+  <desc id="desc">A rounded app icon showing connected token nodes, flowing peer-to-peer paths, and a lightning route.</desc>
+  <defs>
+    <radialGradient id="bgGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(512 412) rotate(90) scale(520)">
+      <stop offset="0" stop-color="#123340"/>
+      <stop offset="0.48" stop-color="#071216"/>
+      <stop offset="1" stop-color="#020405"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="142" y1="122" x2="858" y2="912" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1B2D34"/>
+      <stop offset="0.45" stop-color="#081013"/>
+      <stop offset="1" stop-color="#173225"/>
+    </linearGradient>
+    <linearGradient id="flowCyan" x1="201" y1="314" x2="803" y2="733" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38E8FF"/>
+      <stop offset="0.5" stop-color="#27F3C6"/>
+      <stop offset="1" stop-color="#78FF77"/>
+    </linearGradient>
+    <linearGradient id="tokenGold" x1="392" y1="342" x2="642" y2="671" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF7A3"/>
+      <stop offset="0.34" stop-color="#FFC842"/>
+      <stop offset="0.72" stop-color="#F59B1E"/>
+      <stop offset="1" stop-color="#B85E0F"/>
+    </linearGradient>
+    <linearGradient id="nodeBlue" x1="190" y1="220" x2="380" y2="408" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A9FBFF"/>
+      <stop offset="0.55" stop-color="#24D8F4"/>
+      <stop offset="1" stop-color="#087B9E"/>
+    </linearGradient>
+    <linearGradient id="nodeGreen" x1="663" y1="602" x2="837" y2="778" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B7FFC5"/>
+      <stop offset="0.52" stop-color="#38E978"/>
+      <stop offset="1" stop-color="#159350"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="34" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="cyanGlow" x="-35%" y="-35%" width="170%" height="170%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="goldGlow" x="-35%" y="-35%" width="170%" height="170%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="80" y="80" width="864" height="864" rx="214" fill="url(#bgGlow)"/>
+  <rect x="82" y="82" width="860" height="860" rx="212" stroke="url(#frame)" stroke-width="4"/>
+  <path d="M178 516C250 327 393 232 544 257C690 281 795 402 815 547C836 694 748 807 589 821C410 838 232 737 178 516Z" stroke="#0E5362" stroke-width="3" stroke-dasharray="10 18" opacity="0.55"/>
+  <path d="M257 714C334 543 460 445 608 422C708 407 788 433 849 493" stroke="#0E5362" stroke-width="3" stroke-dasharray="10 18" opacity="0.5"/>
+  <path d="M247 309C346 402 454 469 572 511C668 545 754 559 830 552" stroke="#0E5362" stroke-width="3" stroke-dasharray="10 18" opacity="0.45"/>
+
+  <g filter="url(#cyanGlow)">
+    <path d="M225 545C261 325 434 210 610 263C746 304 824 431 815 570C803 746 642 842 457 790C323 753 236 658 225 545Z" stroke="url(#flowCyan)" stroke-width="20" stroke-linecap="round" opacity="0.92"/>
+    <path d="M212 553C272 620 353 657 456 665C588 676 708 624 801 509" stroke="#3DFBE1" stroke-width="14" stroke-linecap="round" opacity="0.72"/>
+  </g>
+
+  <path d="M594 455L470 617H570L526 748L686 548H586L594 455Z" fill="url(#flowCyan)" filter="url(#cyanGlow)"/>
+
+  <g filter="url(#softShadow)">
+    <circle cx="512" cy="512" r="154" fill="url(#tokenGold)"/>
+    <circle cx="512" cy="512" r="122" fill="#F7B634"/>
+    <circle cx="512" cy="512" r="122" stroke="#FFF3A9" stroke-width="8" opacity="0.65"/>
+    <path d="M512 410L547 478L622 512L547 546L512 614L477 546L402 512L477 478L512 410Z" fill="#FFF3A9"/>
+    <path d="M512 446L530 493L578 512L530 531L512 578L494 531L446 512L494 493L512 446Z" fill="#F09A16"/>
+    <circle cx="512" cy="512" r="16" fill="#7B3D0E"/>
+    <circle cx="432" cy="512" r="10" fill="#7B3D0E" opacity="0.8"/>
+    <circle cx="592" cy="512" r="10" fill="#7B3D0E" opacity="0.8"/>
+    <path d="M448 512H496M528 512H576" stroke="#7B3D0E" stroke-width="10" stroke-linecap="round" opacity="0.72"/>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <circle cx="288" cy="296" r="76" fill="url(#nodeBlue)"/>
+    <circle cx="288" cy="296" r="52" fill="#0C788E"/>
+    <path d="M288 248L303 281L337 296L303 311L288 344L273 311L239 296L273 281L288 248Z" fill="#D5FFFF"/>
+  </g>
+  <g filter="url(#softShadow)">
+    <circle cx="229" cy="622" r="72" fill="url(#nodeBlue)"/>
+    <circle cx="229" cy="622" r="49" fill="#0C788E"/>
+    <path d="M229 577L243 608L275 622L243 636L229 667L215 636L183 622L215 608L229 577Z" fill="#D5FFFF"/>
+  </g>
+  <g filter="url(#softShadow)">
+    <circle cx="764" cy="313" r="62" fill="url(#tokenGold)"/>
+    <circle cx="764" cy="313" r="41" fill="#A76317"/>
+    <path d="M764 276L777 300L801 313L777 326L764 350L751 326L727 313L751 300L764 276Z" fill="#FFF6B6"/>
+  </g>
+  <g filter="url(#softShadow)">
+    <circle cx="763" cy="661" r="74" fill="url(#nodeGreen)"/>
+    <circle cx="763" cy="661" r="50" fill="#147D49"/>
+    <path d="M763 615L777 647L810 661L777 675L763 707L749 675L716 661L749 647L763 615Z" fill="#D9FFE0"/>
+  </g>
+
+  <g filter="url(#cyanGlow)">
+    <circle cx="204" cy="510" r="20" fill="#42F2FF"/>
+    <circle cx="352" cy="735" r="17" fill="#42F2FF"/>
+    <circle cx="620" cy="260" r="19" fill="#42F2FF"/>
+    <circle cx="823" cy="512" r="20" fill="#42F2FF"/>
+    <circle cx="656" cy="422" r="18" fill="#7DFF8D"/>
+    <circle cx="682" cy="784" r="18" fill="#5BFFB2"/>
+  </g>
+</svg>

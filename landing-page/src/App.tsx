@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import './i18n'; // Import i18n configuration
+import tokensBuddyMark from './assets/tokensbuddy-mark.svg';
 import {
   Zap,
   Github,
@@ -46,8 +47,8 @@ function Navbar() {
     <nav className="fixed top-0 inset-x-0 z-40 bg-[#000000]/80 backdrop-blur-md border-b border-cyan-500/20">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-8 h-8 bg-cyan-950/50 border border-cyan-500/50 flex items-center justify-center group-hover:bg-cyan-900/50 group-hover:border-cyan-400 transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-            <Zap className="w-4 h-4 text-cyan-400" />
+          <div className="w-8 h-8 bg-cyan-950/50 border border-cyan-500/50 flex items-center justify-center group-hover:bg-cyan-900/50 group-hover:border-cyan-400 transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)] overflow-hidden">
+            <img src={tokensBuddyMark} alt="" className="w-full h-full object-cover" />
           </div>
           <span className="font-bold text-lg tracking-wider text-white uppercase">TOKENS.BUDDY_<span className="animate-pulse text-cyan-400">[]</span></span>
         </div>

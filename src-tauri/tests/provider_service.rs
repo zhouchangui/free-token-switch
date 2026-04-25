@@ -185,8 +185,8 @@ command = "say"
         "live auth.json should reflect new provider"
     );
 
-    let config_text =
-        std::fs::read_to_string(tokens_buddy_lib::get_codex_config_path()).expect("read config.toml");
+    let config_text = std::fs::read_to_string(tokens_buddy_lib::get_codex_config_path())
+        .expect("read config.toml");
     assert!(
         config_text.contains("mcp_servers.echo-server"),
         "config.toml should contain synced MCP servers"

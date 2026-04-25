@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { providersApi, sessionsApi, settingsApi, type AppId } from "@/lib/api";
 import type { DeleteSessionOptions } from "@/lib/api/sessions";
 import type { SwitchResult } from "@/lib/api/providers";
+import type { ProvidersQueryData } from "@/lib/query/queries";
 import type { Provider, SessionMeta, Settings } from "@/types";
 import { extractErrorMessage } from "@/utils/errorUtils";
 import { generateUUID } from "@/utils/uuid";
@@ -52,7 +53,21 @@ export const useAddProviderMutation = (appId: AppId) => {
       await providersApi.add(newProvider, appId, addToLive);
       return newProvider;
     },
-    onSuccess: async () => {
+    onSuccess: async (provider) => {
+      queryClient.setQueryData<ProvidersQueryData>(
+        ["providers", appId],
+        (current) => {
+          if (!current) return current;
+
+          const providers = { ...current.providers };
+          providers[provider.id] = provider;
+
+          return {
+            ...current,
+            providers,
+          };
+        },
+      );
       await queryClient.invalidateQueries({ queryKey: ["providers", appId] });
 
       if (appId === "opencode") {
@@ -125,7 +140,28 @@ export const useUpdateProviderMutation = (appId: AppId) => {
       await providersApi.update(provider, appId, originalId);
       return provider;
     },
-    onSuccess: async () => {
+    onSuccess: async (provider, variables) => {
+      queryClient.setQueryData<ProvidersQueryData>(
+        ["providers", appId],
+        (current) => {
+          if (!current) return current;
+
+          const providers = { ...current.providers };
+          if (variables.originalId && variables.originalId !== provider.id) {
+            delete providers[variables.originalId];
+          }
+          providers[provider.id] = provider;
+
+          return {
+            ...current,
+            providers,
+            currentProviderId:
+              current.currentProviderId === variables.originalId
+                ? provider.id
+                : current.currentProviderId,
+          };
+        },
+      );
       await queryClient.invalidateQueries({ queryKey: ["providers", appId] });
       if (appId === "openclaw") {
         await queryClient.invalidateQueries({

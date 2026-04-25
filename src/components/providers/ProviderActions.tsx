@@ -18,6 +18,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ProviderShareSettingsDialog } from "@/components/providers/ProviderShareSettingsDialog";
+import { useProviderShareStatus } from "@/components/providers/useProviderShareStatus";
 import { cn } from "@/lib/utils";
 import type { AppId } from "@/lib/api";
 import type { Provider, ProviderShareConfig } from "@/types";
@@ -81,6 +82,9 @@ export function ProviderActions({
   const { t } = useTranslation();
   const [isShareSettingsOpen, setIsShareSettingsOpen] = useState(false);
   const iconButtonClass = "h-8 w-8 p-1";
+  const effectiveAppId = appId ?? "claude";
+  const { isShareEnabled, isShareInProgress, activity } =
+    useProviderShareStatus(effectiveAppId, provider?.id, provider);
 
   // 累加模式应用（OpenCode 非 OMO / OpenClaw / Hermes）
   const isAdditiveMode =
@@ -126,7 +130,7 @@ export function ProviderActions({
           className:
             "bg-gray-200 text-muted-foreground hover:bg-gray-200 hover:text-muted-foreground dark:bg-gray-700 dark:hover:bg-gray-700",
           icon: <Check className="h-4 w-4" />,
-          text: t("provider.inUse"),
+          text: t("provider.inUse", { defaultValue: "使用中" }),
         };
       }
       return {
@@ -200,7 +204,7 @@ export function ProviderActions({
         className:
           "bg-gray-200 text-muted-foreground hover:bg-gray-200 hover:text-muted-foreground dark:bg-gray-700 dark:hover:bg-gray-700",
         icon: <Check className="h-4 w-4" />,
-        text: t("provider.inUse"),
+        text: t("provider.inUse", { defaultValue: "使用中" }),
       };
     }
 
@@ -222,6 +226,10 @@ export function ProviderActions({
   const readOnlyHint = t("provider.managedByHermesHint", {
     defaultValue: "由 Hermes 管理，请在 Hermes Web UI 中编辑",
   });
+  const shareStatusLabel =
+    activity === "market"
+      ? t("provider.marketShareActive", { defaultValue: "售卖中" })
+      : t("provider.friendShareActive", { defaultValue: "分享中" });
 
   return (
     <div className="flex items-center gap-1.5">
@@ -266,6 +274,16 @@ export function ProviderActions({
         {buttonState.icon}
         {buttonState.text}
       </Button>
+
+      {isCurrent && isShareInProgress && (
+        <div
+          data-provider-share-status=""
+          className="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 [&>svg]:animate-spin"
+        >
+          <Loader2 className="h-3.5 w-3.5" />
+          {shareStatusLabel}
+        </div>
+      )}
 
       <div className="flex items-center gap-1">
         <Button
@@ -336,7 +354,11 @@ export function ProviderActions({
               aria-label={t("provider.shareSettings", {
                 defaultValue: "分享设置",
               })}
-              className={iconButtonClass}
+              className={cn(
+                iconButtonClass,
+                isShareEnabled &&
+                  "[&>svg]:animate-spin text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300",
+              )}
             >
               <Store className="h-4 w-4" />
             </Button>

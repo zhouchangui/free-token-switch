@@ -1,0 +1,62 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">TokensBuddy mark</title>
+  <desc id="desc">A vector mark for TokensBuddy showing a token core connected through peer-to-peer flow paths.</desc>
+  <defs>
+    <linearGradient id="bg" x1="190" y1="140" x2="838" y2="884" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E2F38"/>
+      <stop offset="0.52" stop-color="#071114"/>
+      <stop offset="1" stop-color="#0D2C21"/>
+    </linearGradient>
+    <linearGradient id="flow" x1="208" y1="322" x2="816" y2="710" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#37E4F8"/>
+      <stop offset="0.5" stop-color="#2EE8C3"/>
+      <stop offset="1" stop-color="#6CF07C"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="384" y1="326" x2="642" y2="690" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF1A6"/>
+      <stop offset="0.4" stop-color="#F8BE35"/>
+      <stop offset="1" stop-color="#D87616"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="34" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="softGlow" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="96" y="96" width="832" height="832" rx="224" fill="url(#bg)"/>
+  <rect x="98" y="98" width="828" height="828" rx="222" stroke="#2AD5D4" stroke-opacity="0.22" stroke-width="4"/>
+
+  <g filter="url(#softGlow)" opacity="0.92">
+    <path d="M232 529C268 346 419 246 584 281C722 311 809 425 805 559C801 714 673 802 512 784C371 768 257 668 232 529Z" stroke="url(#flow)" stroke-width="30" stroke-linecap="round"/>
+    <path d="M265 631C351 562 449 532 560 540C646 546 719 579 779 638" stroke="url(#flow)" stroke-width="22" stroke-linecap="round" opacity="0.78"/>
+  </g>
+
+  <path d="M592 398L453 576H552L506 710L686 494H584L592 398Z" fill="url(#flow)" filter="url(#softGlow)"/>
+
+  <g filter="url(#shadow)">
+    <circle cx="512" cy="512" r="156" fill="url(#coin)"/>
+    <circle cx="512" cy="512" r="112" fill="#F6B52C"/>
+    <circle cx="512" cy="512" r="112" stroke="#FFF2A8" stroke-width="8" stroke-opacity="0.7"/>
+    <path d="M512 404L550 474L624 512L550 550L512 620L474 550L400 512L474 474L512 404Z" fill="#FFF1A6"/>
+    <path d="M512 452L532 493L572 512L532 531L512 572L492 531L452 512L492 493L512 452Z" fill="#B76112"/>
+    <circle cx="512" cy="512" r="14" fill="#6B340C"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="306" cy="336" r="78" fill="#23CFE7"/>
+    <circle cx="306" cy="336" r="47" fill="#0D7186"/>
+    <circle cx="306" cy="336" r="16" fill="#E2FFFF"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="748" cy="662" r="82" fill="#45E174"/>
+    <circle cx="748" cy="662" r="50" fill="#137940"/>
+    <circle cx="748" cy="662" r="17" fill="#E3FFE7"/>
+  </g>
+</svg>

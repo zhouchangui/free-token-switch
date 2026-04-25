@@ -131,6 +131,25 @@ export interface ProviderSellerConfig {
 }
 
 export type ProviderShareStatus = "idle" | "starting" | "running" | "error";
+export type MarketPriceUnit = "PER_1M_TOKENS";
+export type MarketPriceCurrency = "USD";
+export type MarketModelPriceSource =
+  | "openrouter"
+  | "builtin-default"
+  | "custom";
+
+export interface ProviderMarketModelPrice {
+  modelId: string;
+  enabled: boolean;
+  inputPricePer1mTokens: number;
+  outputPricePer1mTokens: number;
+  cacheReadPricePer1mTokens?: number;
+  cacheWritePricePer1mTokens?: number;
+  currency: MarketPriceCurrency;
+  unit: MarketPriceUnit;
+  source: MarketModelPriceSource;
+  updatedAt: number;
+}
 
 export interface ProviderFriendShareConfig {
   enabled: boolean;
@@ -146,6 +165,11 @@ export interface ProviderMarketShareConfig {
   status: ProviderShareStatus;
   pricingStrategy: "provider" | "custom";
   pricePer1kTokens?: number;
+  discountPercent?: number;
+  modelPrices?: ProviderMarketModelPrice[];
+  priceUnit?: MarketPriceUnit;
+  priceVersion?: number;
+  clawTipWalletAddress?: string;
   endpoint?: string;
   accessToken?: string;
   startedAt?: number;

@@ -79,7 +79,9 @@ export function SharedProviderConfirmation({
         </Select>
       </div>
 
-      {request.model && models.length > 0 && !models.some((m) => m.id === request.model) ? (
+      {request.model &&
+      models.length > 0 &&
+      !models.some((m) => m.id === request.model) ? (
         <p className="text-xs text-amber-700 dark:text-amber-300">
           {t("deeplink.sharedProviderRecommendedModelMissing", {
             defaultValue: "推荐模型不在可用列表中，请重新选择。",
@@ -95,7 +97,9 @@ export function SharedProviderConfirmation({
         </p>
       ) : null}
 
-      {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
+      {error ? (
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      ) : null}
     </div>
   );
 }

@@ -307,6 +307,12 @@ pub struct ProviderMeta {
     /// 卖方配置（前端 sellerConfig）
     #[serde(rename = "sellerConfig", skip_serializing_if = "Option::is_none")]
     pub seller_config: Option<ProviderSellerConfig>,
+    /// 分享/售卖运行态配置（前端 shareConfig）。
+    ///
+    /// 后端当前不需要理解内部结构，但必须完整保留，否则前端启动成功后刷新供应商
+    /// 数据会丢失运行态并回落到“未运行”。
+    #[serde(rename = "shareConfig", skip_serializing_if = "Option::is_none")]
+    pub share_config: Option<Value>,
 }
 
 impl ProviderMeta {
@@ -799,13 +805,46 @@ mod tests {
             seller.get("accessToken").and_then(|v| v.as_str()),
             Some("ccs_sell_token")
         );
-        assert_eq!(seller.get("status").and_then(|v| v.as_str()), Some("published"));
+        assert_eq!(
+            seller.get("status").and_then(|v| v.as_str()),
+            Some("published")
+        );
         assert_eq!(
             seller.get("lastPublishedAt").and_then(|v| v.as_i64()),
             Some(1712345678)
         );
         assert!(seller.get("price_per_1k_tokens").is_none());
         assert!(seller.get("access_token").is_none());
+    }
+
+    #[test]
+    fn provider_meta_round_trips_share_config() {
+        let value = json!({
+            "shareConfig": {
+                "friend": {
+                    "enabled": true,
+                    "status": "running",
+                    "endpoint": "https://friend.trycloudflare.com",
+                    "accessToken": "ccs_sell_friend",
+                    "startedAt": 1712345678000_i64,
+                    "lastError": null
+                },
+                "market": {
+                    "enabled": false,
+                    "status": "idle",
+                    "pricingStrategy": "provider",
+                    "lastPublishedAt": null,
+                    "lastError": null
+                }
+            }
+        });
+
+        let meta: ProviderMeta =
+            serde_json::from_value(value.clone()).expect("deserialize shareConfig");
+        let serialized = serde_json::to_value(&meta).expect("serialize shareConfig");
+
+        assert_eq!(serialized.get("shareConfig"), value.get("shareConfig"));
+        assert!(serialized.get("share_config").is_none());
     }
 
     #[test]

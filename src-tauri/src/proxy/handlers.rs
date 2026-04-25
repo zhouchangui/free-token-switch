@@ -60,9 +60,7 @@ pub async fn get_status(State(state): State<ProxyState>) -> Result<Json<ProxySta
 /// 获取当前 Claude 共享入口的模型列表
 ///
 /// 主要用于 shared provider deeplink 导入前的模型拉取。
-pub async fn handle_models(
-    State(state): State<ProxyState>,
-) -> Result<Json<Value>, ProxyError> {
+pub async fn handle_models(State(state): State<ProxyState>) -> Result<Json<Value>, ProxyError> {
     let current_id = state
         .db
         .get_current_provider("claude")
@@ -89,7 +87,10 @@ pub async fn handle_models(
     let api_key = env
         .get("ANTHROPIC_AUTH_TOKEN")
         .and_then(|value| value.as_str())
-        .or_else(|| env.get("ANTHROPIC_API_KEY").and_then(|value| value.as_str()))
+        .or_else(|| {
+            env.get("ANTHROPIC_API_KEY")
+                .and_then(|value| value.as_str())
+        })
         .unwrap_or_default();
 
     let models = if api_key.trim().is_empty() {
@@ -103,9 +104,7 @@ pub async fn handle_models(
                 if configured_models.is_empty() {
                     return Err(ProxyError::ForwardFailed(error));
                 }
-                log::warn!(
-                    "获取共享 Provider 上游模型列表失败，回退到本地配置模型: {error}"
-                );
+                log::warn!("获取共享 Provider 上游模型列表失败，回退到本地配置模型: {error}");
                 configured_models
             }
         }

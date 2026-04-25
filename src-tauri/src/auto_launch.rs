@@ -76,7 +76,8 @@ mod tests {
     #[cfg(target_os = "macos")]
     #[test]
     fn test_get_macos_app_bundle_path_valid() {
-        let exe_path = std::path::Path::new("/Applications/TokensBuddy.app/Contents/MacOS/TokensBuddy");
+        let exe_path =
+            std::path::Path::new("/Applications/TokensBuddy.app/Contents/MacOS/TokensBuddy");
         let result = get_macos_app_bundle_path(exe_path);
         assert_eq!(
             result,

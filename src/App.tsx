@@ -95,6 +95,7 @@ import AgentsDefaultsPanel from "@/components/openclaw/AgentsDefaultsPanel";
 import OpenClawHealthBanner from "@/components/openclaw/OpenClawHealthBanner";
 import HermesHealthBanner from "@/components/hermes/HermesHealthBanner";
 import HermesMemoryPanel from "@/components/hermes/HermesMemoryPanel";
+import { DevElementAnnotationOverlay } from "@/components/dev/DevElementAnnotationOverlay";
 
 type View =
   | "providers"
@@ -1186,7 +1187,8 @@ function App() {
                     })}
                   {currentView === "sessions" && t("sessionManager.title")}
                   {currentView === "workspace" && t("workspace.title")}
-                  {currentView === "market" && t("market.title", { defaultValue: "算力集市" })}
+                  {currentView === "market" &&
+                    t("market.title", { defaultValue: "算力集市" })}
                   {currentView === "openclawEnv" && t("openclaw.env.title")}
                   {currentView === "openclawTools" && t("openclaw.tools.title")}
                   {currentView === "openclawAgents" &&
@@ -1197,12 +1199,15 @@ function App() {
             ) : (
               <div className="flex items-center gap-2">
                 <div className="relative inline-flex items-center gap-2">
-                  <Zap className={cn(
-                    "w-5 h-5",
-                    isProxyRunning && isCurrentAppTakeoverActive
-                      ? "text-emerald-500 dark:text-emerald-400"
-                      : "text-blue-500 dark:text-blue-400"
-                  )} fill="currentColor" />
+                  <Zap
+                    className={cn(
+                      "w-5 h-5",
+                      isProxyRunning && isCurrentAppTakeoverActive
+                        ? "text-emerald-500 dark:text-emerald-400"
+                        : "text-blue-500 dark:text-blue-400",
+                    )}
+                    fill="currentColor"
+                  />
                   <a
                     href="https://github.com/zhouchangui/tokens-buddy"
                     target="_blank"
@@ -1664,6 +1669,7 @@ function App() {
 
       <DeepLinkImportDialog />
       <FirstRunNoticeDialog />
+      {import.meta.env.DEV ? <DevElementAnnotationOverlay /> : null}
     </div>
   );
 }

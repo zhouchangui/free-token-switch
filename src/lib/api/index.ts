@@ -7,6 +7,7 @@ export { promptsApi } from "./prompts";
 export { skillsApi } from "./skills";
 export { usageApi } from "./usage";
 export { marketApi } from "./market";
+export type { SellerPricingSuggestion, SellerRuntimeStatus } from "./market";
 export { subscriptionApi } from "./subscription";
 export { vscodeApi } from "./vscode";
 export { proxyApi } from "./proxy";
