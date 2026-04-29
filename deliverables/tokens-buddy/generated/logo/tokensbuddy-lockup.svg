@@ -1,0 +1,26 @@
+<svg width="1600" height="480" viewBox="0 0 1600 480" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">TokensBuddy 横向组合标</title>
+  <desc id="desc">包含 TokensBuddy 标记、英文主名和中文辅助名 Token 搭子的横向组合标。</desc>
+  <defs>
+    <linearGradient id="flow" x1="74" y1="112" x2="386" y2="366" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="0.52" stop-color="#0A84FF"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="480" rx="72" fill="#0F1720"/>
+  <g transform="translate(72 60)">
+    <rect width="360" height="360" rx="84" fill="#121820"/>
+    <path d="M82 138C121 67 226 54 282 110C316 144 321 194 293 230C265 267 206 276 162 254C119 233 99 187 118 149" stroke="url(#flow)" stroke-width="26" stroke-linecap="round"/>
+    <path d="M276 246C239 318 129 331 74 270C43 235 40 185 70 150C100 114 160 108 202 132C244 156 261 202 239 239" stroke="#F97366" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="180" cy="180" r="48" fill="#0F1720" stroke="#E6F7FF" stroke-width="10"/>
+    <circle cx="180" cy="180" r="22" fill="#0A84FF"/>
+    <circle cx="82" cy="138" r="29" fill="#0F1720" stroke="#22D3EE" stroke-width="8"/>
+    <circle cx="276" cy="246" r="29" fill="#0F1720" stroke="#10B981" stroke-width="8"/>
+  </g>
+  <text x="500" y="205" fill="#FAFAFA" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="112" font-weight="760" letter-spacing="0">TokensBuddy</text>
+  <text x="506" y="296" fill="#A1A1AA" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="44" font-weight="520" letter-spacing="0">Token 搭子 · 让闲置的 Token 流动起来</text>
+  <path d="M507 335H1170" stroke="#22D3EE" stroke-width="6" stroke-linecap="round" opacity="0.85"/>
+  <circle cx="1197" cy="335" r="11" fill="#10B981"/>
+  <circle cx="1237" cy="335" r="11" fill="#F97366"/>
+</svg>

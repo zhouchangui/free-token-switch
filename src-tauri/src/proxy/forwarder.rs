@@ -761,6 +761,21 @@ impl RequestForwarder {
         extensions: &Extensions,
         adapter: &dyn ProviderAdapter,
     ) -> Result<(ProxyResponse, Option<String>), ProxyError> {
+        if matches!(
+            ProviderType::from_app_type_and_config(&AppType::Claude, provider),
+            ProviderType::ClawtipMarket
+        ) {
+            return super::clawtip_market::forward_clawtip_market_request(
+                provider,
+                endpoint,
+                body,
+                headers,
+                extensions,
+                self.non_streaming_timeout,
+            )
+            .await;
+        }
+
         // 使用适配器提取 base_url
         let mut base_url = adapter.extract_base_url(provider)?;
 

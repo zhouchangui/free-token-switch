@@ -1,7 +1,9 @@
+use crate::services::clawtip::listing::ListingStatus;
 use anyhow::Result;
 use nostr_sdk::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex as StdMutex, OnceLock};
@@ -13,7 +15,7 @@ use tokio::time::timeout;
 use uuid::Uuid;
 
 /// AI 市场售卖公告
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MarketListing {
     pub provider_id: String,
     pub model_name: String,
@@ -27,6 +29,36 @@ pub struct MarketListing {
     pub price_unit: String,
     #[serde(rename = "priceVersion", default = "default_market_price_version")]
     pub price_version: u32,
+    #[serde(default = "default_market_listing_status")]
+    pub status: ListingStatus,
+    #[serde(default = "default_market_listing_capacity")]
+    pub capacity: u32,
+    #[serde(default = "default_market_listing_streaming")]
+    pub streaming: bool,
+    #[serde(default)]
+    pub payment: Option<MarketPaymentListing>,
+    #[serde(rename = "resourceUrl", default)]
+    pub resource_url: String,
+    #[serde(rename = "amountFen", default)]
+    pub amount_fen: i64,
+    #[serde(
+        rename = "accessToken",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub access_token: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MarketPaymentListing {
+    pub provider: String,
+    pub mode: String,
+    pub amount_fen: i64,
+    pub currency: String,
+    pub skill_slug: String,
+    pub indicator: String,
+    pub pay_to: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -127,6 +159,18 @@ fn default_market_price_version() -> u32 {
     MARKET_PRICE_VERSION
 }
 
+fn default_market_listing_status() -> ListingStatus {
+    ListingStatus::Available
+}
+
+fn default_market_listing_capacity() -> u32 {
+    1
+}
+
+fn default_market_listing_streaming() -> bool {
+    true
+}
+
 pub struct MarketService {
     keys: Keys,
     client: Client,
@@ -137,7 +181,18 @@ pub struct MarketService {
 
 impl MarketService {
     pub fn new() -> Self {
-        let keys = Keys::generate();
+        Self::new_with_identity_path(default_seller_identity_path())
+    }
+
+    pub fn new_with_identity_path(identity_path: PathBuf) -> Self {
+        let keys = load_or_create_seller_keys(&identity_path).unwrap_or_else(|err| {
+            log::warn!(
+                "加载市场卖家身份失败，将使用本次进程临时身份: path={}, error={}",
+                identity_path.display(),
+                err
+            );
+            Keys::generate()
+        });
         let client = Client::new(keys.clone());
 
         Self {
@@ -298,6 +353,10 @@ impl MarketService {
         let event_id = self.client.send_event_builder(builder).await?;
         log::info!("Nostr 公告已发布: {:?}", event_id);
         Ok(event_id.to_string())
+    }
+
+    pub fn seller_pubkey(&self) -> String {
+        self.keys.public_key().to_string()
     }
 
     pub fn generate_access_token_for(provider_id: &str) -> String {
@@ -496,6 +555,46 @@ impl MarketService {
         }
         Ok(results)
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SellerIdentityFile {
+    secret_key_hex: String,
+    public_key: String,
+}
+
+fn default_seller_identity_path() -> PathBuf {
+    crate::config::get_app_config_dir()
+        .join("market")
+        .join("seller-identity.json")
+}
+
+fn load_or_create_seller_keys(path: &Path) -> Result<Keys> {
+    if path.exists() {
+        let raw = std::fs::read_to_string(path)?;
+        let identity: SellerIdentityFile = serde_json::from_str(&raw)?;
+        let keys = Keys::parse(&identity.secret_key_hex)?;
+        return Ok(keys);
+    }
+
+    let keys = Keys::generate();
+    write_seller_identity(path, &keys)?;
+    Ok(keys)
+}
+
+fn write_seller_identity(path: &Path, keys: &Keys) -> Result<()> {
+    let parent = path
+        .parent()
+        .ok_or_else(|| anyhow::anyhow!("invalid seller identity path: {}", path.display()))?;
+    std::fs::create_dir_all(parent)?;
+    let identity = SellerIdentityFile {
+        secret_key_hex: keys.secret_key().to_secret_hex(),
+        public_key: keys.public_key().to_string(),
+    };
+    let content = serde_json::to_string_pretty(&identity)?;
+    std::fs::write(path, content)?;
+    Ok(())
 }
 
 fn suggest_price_from_openrouter_snapshot(
@@ -774,17 +873,50 @@ async fn stop_and_reap_child(child: &mut tokio::process::Child) {
 #[cfg(test)]
 mod tests {
     use super::{
-        extract_cloudflare_tunnel_url, install_command_for_os,
+        extract_cloudflare_tunnel_url, install_command_for_os, load_or_create_seller_keys,
         suggest_price_from_openrouter_snapshot, wait_for_tunnel_url,
-        wait_for_tunnel_url_from_streams, MarketListing, MarketModelPrice, MarketService,
+        wait_for_tunnel_url_from_streams, MarketListing, MarketModelPrice, MarketPaymentListing,
+        MarketService,
     };
+    use std::sync::{Mutex as TestMutex, MutexGuard};
     use tokio::io::AsyncWriteExt;
+
+    static TOKEN_TEST_LOCK: TestMutex<()> = TestMutex::new(());
+
+    fn token_test_guard() -> MutexGuard<'static, ()> {
+        TOKEN_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|err| err.into_inner())
+    }
 
     #[test]
     fn generate_access_token_returns_non_empty_value() {
         let token = MarketService::generate_access_token_for("provider-1");
         assert!(!token.is_empty());
         assert!(token.starts_with("ccs_sell_"));
+    }
+
+    #[test]
+    fn seller_identity_persists_between_market_service_instances() {
+        let temp_dir = tempfile::tempdir().expect("create temp dir");
+        let identity_path = temp_dir.path().join("market").join("seller-identity.json");
+
+        let first = MarketService::new_with_identity_path(identity_path.clone());
+        let second = MarketService::new_with_identity_path(identity_path.clone());
+
+        assert_eq!(first.seller_pubkey(), second.seller_pubkey());
+        assert!(identity_path.exists());
+    }
+
+    #[test]
+    fn load_or_create_seller_keys_reuses_saved_secret_key() {
+        let temp_dir = tempfile::tempdir().expect("create temp dir");
+        let identity_path = temp_dir.path().join("seller-identity.json");
+
+        let first = load_or_create_seller_keys(&identity_path).expect("create keys");
+        let second = load_or_create_seller_keys(&identity_path).expect("load keys");
+
+        assert_eq!(first.public_key(), second.public_key());
     }
 
     #[test]
@@ -796,6 +928,7 @@ mod tests {
 
     #[test]
     fn generate_and_register_access_token_allows_later_validation() {
+        let _guard = token_test_guard();
         MarketService::clear_access_tokens_for_tests();
 
         let token = MarketService::generate_and_register_access_token_for("provider-1");
@@ -806,6 +939,7 @@ mod tests {
 
     #[test]
     fn invalidating_provider_tokens_rejects_old_access_token() {
+        let _guard = token_test_guard();
         MarketService::clear_access_tokens_for_tests();
         let token = MarketService::generate_and_register_access_token_for("provider-1");
 
@@ -900,12 +1034,33 @@ mod tests {
             }],
             price_unit: "PER_1M_TOKENS".to_string(),
             price_version: 1,
+            status: crate::services::clawtip::listing::ListingStatus::Available,
+            capacity: 1,
+            streaming: true,
+            payment: Some(MarketPaymentListing {
+                provider: "clawtip".to_string(),
+                mode: "per_call_prepaid".to_string(),
+                amount_fen: 15,
+                currency: "CNY_FEN".to_string(),
+                skill_slug: "tokens-buddy-llm-console".to_string(),
+                indicator: "tokens-buddy-provider-1".to_string(),
+                pay_to: "payto_1234567890abcdef".to_string(),
+            }),
+            resource_url: "https://seller.trycloudflare.com".to_string(),
+            amount_fen: 15,
+            access_token: Some("seller-token".to_string()),
         };
 
         let value = serde_json::to_value(&listing).unwrap();
 
         assert_eq!(value["priceUnit"], "PER_1M_TOKENS");
         assert_eq!(value["priceVersion"], 1);
+        assert_eq!(value["status"], "available");
+        assert_eq!(value["capacity"], 1);
+        assert_eq!(value["payment"]["amountFen"], 15);
+        assert_eq!(value["payment"]["indicator"], "tokens-buddy-provider-1");
+        assert_eq!(value["payment"]["payTo"], "payto_1234567890abcdef");
+        assert_eq!(value["resourceUrl"], "https://seller.trycloudflare.com");
         assert_eq!(
             value["modelPrices"][0]["inputPricePer1mTokens"],
             serde_json::json!(3.0)

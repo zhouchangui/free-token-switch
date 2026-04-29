@@ -906,6 +906,7 @@
       "lemondata": "Lemon Code は TokensBuddy ユーザー向けの特別オファーを提供しています。このリンクから登録すると 1 ドル分の無料クレジットがもらえます。"
     },
     "presets": {
+      "clawtipMarket": "ClawTip マーケット",
       "ucloud": "Compshare",
       "shengsuanyun": "Shengsuanyun",
       "openrouter": "OpenRouter",
@@ -2640,6 +2641,28 @@
     },
     "suggestedDefaults": "推奨デフォルト設定を適用",
     "suggestedDefaultsHint": "このプリセットの推奨デフォルトモデル設定を使用します"
+  },
+  "market": {
+    "title": "計算マーケット",
+    "sellerTitle": "販売モード",
+    "sellerDescription": "現在のプロキシチャネルを ClawTip の従量課金ノードとして公開します",
+    "pricePerCall": "分 / 回",
+    "broadcasting": "公開配信中：",
+    "online": "オンライン",
+    "squareTitle": "グローバル計算広場",
+    "refresh": "広場を更新",
+    "promptPlaceholder": "購入後に呼び出すプロンプトを入力",
+    "empty": "現在販売中のノードはありません。更新して確認してください。",
+    "fenPerCall": "分/回",
+    "buy": "購入",
+    "clawtipNotice": "購入すると ClawTip 注文が作成されます。支払い認証情報が注文に書き込まれると、1 回の有料呼び出しに使用できます。",
+    "purchaseMissingPayment": "このノードには ClawTip 支払い情報がないため、まだ購入できません。",
+    "orderCreated": "注文 {{orderNo}} を作成しました。金額は {{amount}} 分です。",
+    "purchaseFailed": "購入に失敗しました：{{message}}",
+    "loadFailed": "マーケットの読み込みに失敗しました：{{message}}",
+    "sellerStarted": "AI ノードがオンラインになり、分散ネットワークへ配信中です",
+    "sellerStartFailed": "起動に失敗しました：{{message}}",
+    "sellerStopped": "販売を停止し、接続を閉じました"
   },
   "subscription": {
     "title": "サブスクリプションクォータ",

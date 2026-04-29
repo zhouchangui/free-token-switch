@@ -906,6 +906,7 @@
       "lemondata": "Lemon Code 为 TokensBuddy 的用户提供了特别优惠。使用此链接注册可以获得1美元免费额度。"
     },
     "presets": {
+      "clawtipMarket": "ClawTip 市场",
       "ucloud": "优云智算",
       "shengsuanyun": "胜算云",
       "openrouter": "OpenRouter",
@@ -2640,6 +2641,28 @@
     },
     "suggestedDefaults": "应用建议默认配置",
     "suggestedDefaultsHint": "使用此预设推荐的默认模型配置"
+  },
+  "market": {
+    "title": "算力集市",
+    "sellerTitle": "我要摆摊",
+    "sellerDescription": "把当前代理通道发布为 ClawTip 按次付费节点",
+    "pricePerCall": "分 / 次",
+    "broadcasting": "正在公网广播：",
+    "online": "在线",
+    "squareTitle": "全球算力广场",
+    "refresh": "刷新广场",
+    "promptPlaceholder": "输入本次购买后要调用的提示词",
+    "empty": "暂时没有节点在售，点击刷新看看。",
+    "fenPerCall": "分/次",
+    "buy": "购买",
+    "clawtipNotice": "购买会创建 ClawTip 订单；支付凭证写入订单后即可用于一次付费调用。",
+    "purchaseMissingPayment": "该节点缺少 ClawTip 支付信息，暂时无法购买。",
+    "orderCreated": "订单 {{orderNo}} 已创建，金额 {{amount}} 分。",
+    "purchaseFailed": "购买失败：{{message}}",
+    "loadFailed": "加载集市失败：{{message}}",
+    "sellerStarted": "您的 AI 节点已上线，正在去中心化网络广播",
+    "sellerStartFailed": "启动失败：{{message}}",
+    "sellerStopped": "已停止售卖并关闭连接"
   },
   "subscription": {
     "title": "订阅额度",

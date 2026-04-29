@@ -65,6 +65,8 @@ pub enum ProviderType {
     GitHubCopilot,
     /// OpenAI Codex (ChatGPT Plus/Pro OAuth，需要 Anthropic ↔ Responses API 转换)
     CodexOAuth,
+    /// ClawTip relay market buyer runtime
+    ClawtipMarket,
 }
 
 impl ProviderType {
@@ -95,6 +97,7 @@ impl ProviderType {
             ProviderType::OpenRouter => "https://openrouter.ai/api",
             ProviderType::GitHubCopilot => "https://api.githubcopilot.com",
             ProviderType::CodexOAuth => "https://chatgpt.com/backend-api/codex",
+            ProviderType::ClawtipMarket => "http://127.0.0.1:17860/clawtip-market/anthropic",
         }
     }
 
@@ -113,8 +116,11 @@ impl ProviderType {
                     };
                 }
 
-                // 检测是否为 GitHub Copilot
+                // 检测显式 provider meta
                 if let Some(meta) = provider.meta.as_ref() {
+                    if meta.provider_type.as_deref() == Some("clawtip_market") {
+                        return ProviderType::ClawtipMarket;
+                    }
                     if meta.provider_type.as_deref() == Some("github_copilot") {
                         return ProviderType::GitHubCopilot;
                     }
@@ -192,6 +198,7 @@ impl ProviderType {
             ProviderType::OpenRouter => "openrouter",
             ProviderType::GitHubCopilot => "github_copilot",
             ProviderType::CodexOAuth => "codex_oauth",
+            ProviderType::ClawtipMarket => "clawtip_market",
         }
     }
 }
@@ -217,6 +224,9 @@ impl std::str::FromStr for ProviderType {
                 Ok(ProviderType::GitHubCopilot)
             }
             "codex_oauth" | "codex-oauth" | "codexoauth" => Ok(ProviderType::CodexOAuth),
+            "clawtip_market" | "clawtip-market" | "clawtipmarket" => {
+                Ok(ProviderType::ClawtipMarket)
+            }
             _ => Err(format!("Invalid provider type: {s}")),
         }
     }
@@ -243,7 +253,8 @@ pub fn get_adapter_for_provider_type(provider_type: &ProviderType) -> Box<dyn Pr
         | ProviderType::ClaudeAuth
         | ProviderType::OpenRouter
         | ProviderType::GitHubCopilot
-        | ProviderType::CodexOAuth => Box::new(ClaudeAdapter::new()),
+        | ProviderType::CodexOAuth
+        | ProviderType::ClawtipMarket => Box::new(ClaudeAdapter::new()),
         ProviderType::Codex => Box::new(CodexAdapter::new()),
         ProviderType::Gemini | ProviderType::GeminiCli => Box::new(GeminiAdapter::new()),
     }
@@ -279,6 +290,7 @@ mod tests {
         assert!(!ProviderType::Gemini.needs_transform());
         assert!(!ProviderType::GeminiCli.needs_transform());
         assert!(!ProviderType::OpenRouter.needs_transform());
+        assert!(!ProviderType::ClawtipMarket.needs_transform());
         assert!(ProviderType::GitHubCopilot.needs_transform());
     }
 
@@ -311,6 +323,10 @@ mod tests {
         assert_eq!(
             ProviderType::GitHubCopilot.default_endpoint(),
             "https://api.githubcopilot.com"
+        );
+        assert_eq!(
+            ProviderType::ClawtipMarket.default_endpoint(),
+            "http://127.0.0.1:17860/clawtip-market/anthropic"
         );
     }
 
@@ -360,7 +376,34 @@ mod tests {
             "githubcopilot".parse::<ProviderType>().unwrap(),
             ProviderType::GitHubCopilot
         );
+        assert_eq!(
+            "clawtip_market".parse::<ProviderType>().unwrap(),
+            ProviderType::ClawtipMarket
+        );
         assert!("invalid".parse::<ProviderType>().is_err());
+    }
+
+    #[test]
+    fn clawtip_market_provider_type_uses_provider_meta() {
+        let mut provider = create_provider(json!({
+            "env": {
+                "ANTHROPIC_BASE_URL": "http://127.0.0.1:17860/clawtip-market/anthropic",
+                "ANTHROPIC_AUTH_TOKEN": "clawtip-market"
+            }
+        }));
+        provider.meta = Some(crate::provider::ProviderMeta {
+            provider_type: Some("clawtip_market".to_string()),
+            ..Default::default()
+        });
+
+        assert_eq!(
+            ProviderType::from_app_type_and_config(&AppType::Claude, &provider),
+            ProviderType::ClawtipMarket
+        );
+        assert_eq!(
+            "clawtip_market".parse::<ProviderType>().unwrap(),
+            ProviderType::ClawtipMarket
+        );
     }
 
     #[test]
@@ -372,6 +415,7 @@ mod tests {
         assert_eq!(ProviderType::GeminiCli.as_str(), "gemini_cli");
         assert_eq!(ProviderType::OpenRouter.as_str(), "openrouter");
         assert_eq!(ProviderType::GitHubCopilot.as_str(), "github_copilot");
+        assert_eq!(ProviderType::ClawtipMarket.as_str(), "clawtip_market");
     }
 
     #[test]
@@ -493,6 +537,9 @@ mod tests {
         assert_eq!(adapter.name(), "Claude");
 
         let adapter = get_adapter_for_provider_type(&ProviderType::GitHubCopilot);
+        assert_eq!(adapter.name(), "Claude");
+
+        let adapter = get_adapter_for_provider_type(&ProviderType::ClawtipMarket);
         assert_eq!(adapter.name(), "Claude");
 
         let adapter = get_adapter_for_provider_type(&ProviderType::Codex);

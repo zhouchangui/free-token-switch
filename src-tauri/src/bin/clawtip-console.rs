@@ -1,23 +1,23 @@
-use std::{
-    path::{Path, PathBuf},
-    time::{Duration, Instant},
-};
+use std::path::PathBuf;
 
 use serde::Serialize;
 use tokens_buddy_lib::clawtip::{
     config::{default_config_path, write_clawtip_config, ClawtipConfigInit},
     credential::{create_mock_pay_credential, verify_pay_credential_for_order},
-    crypto::encrypt_clawtip_order_data_base64,
     fulfillment::{ClawtipFulfillmentResult, LocalFulfillmentStore},
     listing::ListingStatus,
     listing::{ClawtipListing, ClawtipListingInput},
     mock_llm::default_mock_llm_response,
     order_file::{
         default_tokens_buddy_orders_dir, list_order_files, order_file_path, read_order_file_by_id,
-        write_order_file, write_order_pay_credential, ClawtipOrderFile,
+        write_order_pay_credential, ClawtipOrderFile,
     },
     process_log::ProcessLogEvent,
     relay::{LocalRelayRegistry, NostrRelayAdapter},
+    service::{
+        CallPaidInferenceRequest, ClawtipService, ClawtipServicePaths, CreateClawtipOrderRequest,
+        WaitClawtipPaymentRequest,
+    },
 };
 
 fn main() {
@@ -449,12 +449,9 @@ fn run_buyer_buy(args: &[String]) -> Result<(), String> {
     let pay_to = required_arg(args, "--pay-to")?;
     let indicator = optional_arg(args, "--indicator").unwrap_or_else(|| "dev-indicator".into());
     let order_no = optional_arg(args, "--order-no").unwrap_or_else(generate_order_no);
-    let encrypted_data = build_encrypted_data(args, &order_no, amount_fen, &pay_to)?;
-    let base_dir = optional_arg(args, "--orders-dir")
-        .map(PathBuf::from)
-        .unwrap_or_else(default_tokens_buddy_orders_dir);
     let endpoint =
         optional_arg(args, "--endpoint").unwrap_or_else(|| "http://127.0.0.1:37891".into());
+    let service = console_clawtip_service(args);
 
     println!(
         "{}",
@@ -464,20 +461,17 @@ fn run_buyer_buy(args: &[String]) -> Result<(), String> {
             .to_json_line()
     );
 
-    let order = ClawtipOrderFile {
-        skill_id: "si-tokens-buddy-llm-console".to_string(),
-        order_no: order_no.clone(),
-        amount: amount_fen,
-        question: prompt.clone(),
-        encrypted_data,
+    let created = service.create_order(CreateClawtipOrderRequest {
+        listing_id: listing_id.clone(),
+        prompt: prompt.clone(),
+        amount_fen,
         pay_to,
-        description: "TokensBuddy LLM console test call".to_string(),
-        slug: "tokens-buddy-llm-console".to_string(),
-        resource_url: endpoint,
-        pay_credential: None,
-    };
-
-    let path = write_order_file(&base_dir, &indicator, &order)?;
+        indicator: indicator.clone(),
+        order_no: Some(order_no.clone()),
+        endpoint,
+        sm4_key_base64: optional_sm4_key_base64(args),
+        encrypted_data: optional_arg(args, "--encrypted-data"),
+    })?;
     maybe_update_listing_status(args, &listing_id, ListingStatus::Reserved);
 
     println!(
@@ -485,14 +479,14 @@ fn run_buyer_buy(args: &[String]) -> Result<(), String> {
         ProcessLogEvent::new("clawtip.order_file.write.ok")
             .field("listingId", listing_id)
             .field("orderNo", order_no.clone())
-            .field("path", path.display().to_string())
+            .field("path", created.order_file.clone())
             .to_json_line()
     );
     println!("ORDER_NO={order_no}");
     println!("AMOUNT={amount_fen}");
     println!("QUESTION={prompt}");
     println!("INDICATOR={indicator}");
-    println!("ORDER_FILE={}", path.display());
+    println!("ORDER_FILE={}", created.order_file);
     println!("PAYMENT_PROVIDER=clawtip");
     Ok(())
 }
@@ -500,7 +494,6 @@ fn run_buyer_buy(args: &[String]) -> Result<(), String> {
 fn run_buyer_wait_payment(args: &[String]) -> Result<(), String> {
     let order_no = required_arg(args, "--order-no")?;
     let indicator = optional_arg(args, "--indicator").unwrap_or_else(|| "dev-indicator".into());
-    let base_dir = orders_base_dir(args);
     let timeout_ms = optional_arg(args, "--timeout-ms")
         .unwrap_or_else(|| "30000".to_string())
         .parse::<u64>()
@@ -512,25 +505,20 @@ fn run_buyer_wait_payment(args: &[String]) -> Result<(), String> {
             .field("orderNo", order_no.clone())
             .to_json_line()
     );
-    let order = wait_for_payment_credential(
-        &base_dir,
-        &indicator,
-        &order_no,
-        Duration::from_millis(timeout_ms),
-        Duration::from_millis(250),
-    )?;
+    let service = console_clawtip_service(args);
+    let waited = service.wait_payment(WaitClawtipPaymentRequest {
+        indicator,
+        order_no: order_no.clone(),
+        timeout_ms,
+    })?;
 
     println!(
         "{}",
         ProcessLogEvent::new("clawtip.payment.credential.detected")
-            .field("orderNo", order.order_no.clone())
-            .field(
-                "payCredential",
-                order.pay_credential.clone().unwrap_or_default(),
-            )
+            .field("orderNo", waited.order_no.clone())
             .to_json_line()
     );
-    println!("ORDER_NO={}", order.order_no);
+    println!("ORDER_NO={}", waited.order_no);
     println!("PAYMENT_STATUS=credential_detected");
     Ok(())
 }
@@ -601,13 +589,7 @@ fn run_buyer_call(args: &[String]) -> Result<(), String> {
 fn call_paid_order(args: &[String]) -> Result<ClawtipFulfillmentResult, String> {
     let order_no = required_arg(args, "--order-no")?;
     let indicator = optional_arg(args, "--indicator").unwrap_or_else(|| "dev-indicator".into());
-    let base_dir = orders_base_dir(args);
     let sm4_key_base64 = sm4_key_base64(args)?;
-    let order = read_order_file_by_id(&base_dir, &indicator, &order_no)?;
-    let credential = order
-        .pay_credential
-        .as_deref()
-        .ok_or_else(|| format!("payCredential missing for order {order_no}"))?;
 
     println!(
         "{}",
@@ -615,11 +597,18 @@ fn call_paid_order(args: &[String]) -> Result<ClawtipFulfillmentResult, String> 
             .field("orderNo", order_no.clone())
             .to_json_line()
     );
-    verify_pay_credential_for_order(&order, credential, &sm4_key_base64)?;
+    let service = console_clawtip_service(args);
+    service.verify_credential(
+        tokens_buddy_lib::clawtip::service::VerifyClawtipCredentialRequest {
+            indicator: indicator.clone(),
+            order_no: order_no.clone(),
+            sm4_key_base64: sm4_key_base64.clone(),
+        },
+    )?;
     println!(
         "{}",
         ProcessLogEvent::new("clawtip.payment.verify.ok")
-            .field("orderNo", order_no)
+            .field("orderNo", order_no.clone())
             .to_json_line()
     );
     println!(
@@ -627,8 +616,22 @@ fn call_paid_order(args: &[String]) -> Result<ClawtipFulfillmentResult, String> 
         ProcessLogEvent::new("clawtip.inference.mock.start").to_json_line()
     );
 
-    let store = LocalFulfillmentStore::new(fulfillment_store_path(args));
-    let result = store.fulfill_once(&order)?;
+    let result = service.call_paid_inference_once(CallPaidInferenceRequest {
+        indicator,
+        order_no,
+        sm4_key_base64,
+        listing_id: optional_arg(args, "--listing-id"),
+    })?;
+    let result = ClawtipFulfillmentResult {
+        already_fulfilled: result.already_fulfilled,
+        call_session_id: result.call_session_id,
+        answer: result.answer,
+        usage: tokens_buddy_lib::clawtip::mock_llm::MockLlmUsage {
+            input_tokens: result.input_tokens,
+            output_tokens: result.output_tokens,
+            total_tokens: result.input_tokens + result.output_tokens,
+        },
+    };
     if !result.already_fulfilled {
         if let Some(listing_id) = optional_arg(args, "--listing-id") {
             maybe_update_listing_status(args, &listing_id, ListingStatus::Busy);
@@ -646,14 +649,15 @@ fn call_paid_order(args: &[String]) -> Result<ClawtipFulfillmentResult, String> 
     Ok(result)
 }
 
+#[cfg(test)]
 fn wait_for_payment_credential(
-    base_dir: &Path,
+    base_dir: &std::path::Path,
     indicator: &str,
     order_no: &str,
-    timeout: Duration,
-    interval: Duration,
+    timeout: std::time::Duration,
+    interval: std::time::Duration,
 ) -> Result<ClawtipOrderFile, String> {
-    let started_at = Instant::now();
+    let started_at = std::time::Instant::now();
     loop {
         let order = read_order_file_by_id(base_dir, indicator, order_no)?;
         if order
@@ -670,38 +674,6 @@ fn wait_for_payment_credential(
         }
         std::thread::sleep(interval);
     }
-}
-
-fn build_encrypted_data(
-    args: &[String],
-    order_no: &str,
-    amount_fen: i64,
-    pay_to: &str,
-) -> Result<String, String> {
-    if let Some(encrypted_data) = optional_arg(args, "--encrypted-data") {
-        return Ok(encrypted_data);
-    }
-
-    let sm4_key_base64 = sm4_key_base64(args)
-        .map_err(|_| "missing --encrypted-data or --sm4-key-base64/CLAWTIP_SM4_KEY".to_string())?;
-
-    println!(
-        "{}",
-        ProcessLogEvent::new("clawtip.encrypted_data.create.start")
-            .field("orderNo", order_no.to_string())
-            .field("sm4KeyBase64", sm4_key_base64.clone())
-            .to_json_line()
-    );
-    let encrypted_data =
-        encrypt_clawtip_order_data_base64(order_no, amount_fen, pay_to, &sm4_key_base64)?;
-    println!(
-        "{}",
-        ProcessLogEvent::new("clawtip.encrypted_data.create.ok")
-            .field("orderNo", order_no.to_string())
-            .to_json_line()
-    );
-
-    Ok(encrypted_data)
 }
 
 fn local_relay_registry(args: &[String]) -> LocalRelayRegistry {
@@ -760,6 +732,13 @@ fn fulfillment_store_path(args: &[String]) -> PathBuf {
     optional_arg(args, "--fulfillment-store")
         .map(PathBuf::from)
         .unwrap_or_else(LocalFulfillmentStore::default_path)
+}
+
+fn console_clawtip_service(args: &[String]) -> ClawtipService {
+    ClawtipService::new(ClawtipServicePaths {
+        orders_dir: orders_base_dir(args),
+        fulfillment_store: fulfillment_store_path(args),
+    })
 }
 
 fn has_flag(args: &[String], name: &str) -> bool {

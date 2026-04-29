@@ -1,0 +1,29 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">TokensBuddy OG 分享图</title>
+  <desc id="desc">用于社媒链接预览的 TokensBuddy 品牌图。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A0F16"/>
+      <stop offset="0.65" stop-color="#111820"/>
+      <stop offset="1" stop-color="#192330"/>
+    </linearGradient>
+    <linearGradient id="flow" x1="682" y1="212" x2="1052" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="0.5" stop-color="#0A84FF"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1010" cy="100" r="260" fill="#0A84FF" fill-opacity="0.13"/>
+  <circle cx="1030" cy="585" r="240" fill="#10B981" fill-opacity="0.09"/>
+  <text x="76" y="116" fill="#A1A1AA" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="24" font-weight="650">TokensBuddy · Token 搭子</text>
+  <text x="76" y="252" fill="#FAFAFA" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="68" font-weight="820">让闲置的 Token</text>
+  <text x="76" y="332" fill="#FAFAFA" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="68" font-weight="820">流动起来</text>
+  <text x="80" y="406" fill="#A1A1AA" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="25">Token 切换、分享与交易工作台</text>
+  <rect x="80" y="458" width="308" height="48" rx="24" fill="#0A84FF"/>
+  <text x="125" y="489" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="18" font-weight="720">Provider · Share · Market</text>
+  <path d="M672 318C746 182 948 160 1056 268C1120 332 1130 426 1078 496C1024 568 908 586 823 544C739 503 700 414 738 340" stroke="url(#flow)" stroke-width="36" stroke-linecap="round"/>
+  <path d="M1054 482C982 612 783 632 680 518C622 454 616 360 672 294C728 228 840 216 920 262C1000 308 1033 396 992 466" stroke="#F97366" stroke-width="36" stroke-linecap="round"/>
+  <circle cx="864" cy="382" r="74" fill="#0F1720" stroke="#FAFAFA" stroke-width="12"/>
+  <circle cx="864" cy="382" r="34" fill="#0A84FF"/>
+</svg>

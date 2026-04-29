@@ -937,6 +937,10 @@ export function ProviderShareSettingsDialog({
         modelPrices,
         priceUnit: MARKET_PRICE_UNIT,
         priceVersion: MARKET_PRICE_VERSION,
+        amountFen: estimateClawTipAmountFen(modelPrices, pricePer1kTokens),
+        payTo: walletAddress,
+        indicator: `tokens-buddy-${provider.id}`,
+        accessToken,
       });
 
       if (marketStartOpRef.current !== operationId) {
@@ -2183,6 +2187,19 @@ function discountOptionalPrice(value: number | undefined, discount: number) {
 
 function discountPrice(value: number, discount: number) {
   return Number((value * discount).toFixed(12));
+}
+
+function estimateClawTipAmountFen(
+  modelPrices: NonNullable<SellerPricingSuggestion["modelPrice"]>[],
+  fallbackPrice: number,
+): number {
+  const outputPrice = modelPrices
+    .filter((price) => price.enabled)
+    .map((price) => price.outputPricePer1mTokens)
+    .find((value) => Number.isFinite(value) && value > 0);
+  const base = outputPrice ?? fallbackPrice;
+
+  return Math.max(1, Math.ceil(base));
 }
 
 function MarketSharePanel({

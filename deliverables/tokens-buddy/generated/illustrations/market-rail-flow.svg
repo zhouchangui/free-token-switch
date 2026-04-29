@@ -1,0 +1,43 @@
+<svg width="1440" height="720" viewBox="0 0 1440 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">市场发布与交易轨道</title>
+  <desc id="desc">展示 Token 从配置、测试、发布、下单到结算的受控市场轨道。</desc>
+  <rect width="1440" height="720" rx="40" fill="#0F1720"/>
+  <text x="88" y="96" fill="#FAFAFA" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="40" font-weight="740">让闲置 Token 进入可追踪的市场轨道</text>
+  <text x="88" y="140" fill="#A1A1AA" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20">配置、测试、发布、下单、结算，每一步都有状态边界。</text>
+  <path d="M162 370H1278" stroke="#3F3F46" stroke-width="12" stroke-linecap="round"/>
+  <path d="M162 370H960" stroke="#F59E0B" stroke-width="12" stroke-linecap="round"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+    <g transform="translate(120 260)">
+      <circle cx="42" cy="110" r="42" fill="#0A84FF"/>
+      <text x="16" y="118" fill="white" font-size="24" font-weight="800">1</text>
+      <text x="-4" y="190" fill="#FAFAFA" font-size="22" font-weight="700">配置</text>
+      <text x="-30" y="224" fill="#A1A1AA" font-size="15">Provider 可用</text>
+    </g>
+    <g transform="translate(385 260)">
+      <circle cx="42" cy="110" r="42" fill="#10B981"/>
+      <text x="16" y="118" fill="white" font-size="24" font-weight="800">2</text>
+      <text x="-4" y="190" fill="#FAFAFA" font-size="22" font-weight="700">测试</text>
+      <text x="-40" y="224" fill="#A1A1AA" font-size="15">模型与额度确认</text>
+    </g>
+    <g transform="translate(650 260)">
+      <circle cx="42" cy="110" r="42" fill="#F59E0B"/>
+      <text x="16" y="118" fill="white" font-size="24" font-weight="800">3</text>
+      <text x="-4" y="190" fill="#FAFAFA" font-size="22" font-weight="700">发布</text>
+      <text x="-38" y="224" fill="#A1A1AA" font-size="15">进入市场列表</text>
+    </g>
+    <g transform="translate(915 260)">
+      <circle cx="42" cy="110" r="42" fill="#22D3EE"/>
+      <text x="16" y="118" fill="#0F1720" font-size="24" font-weight="800">4</text>
+      <text x="-4" y="190" fill="#FAFAFA" font-size="22" font-weight="700">下单</text>
+      <text x="-40" y="224" fill="#A1A1AA" font-size="15">买家接入资源</text>
+    </g>
+    <g transform="translate(1180 260)">
+      <circle cx="42" cy="110" r="42" fill="#27313E" stroke="#F59E0B" stroke-width="4"/>
+      <text x="16" y="118" fill="#F9C979" font-size="24" font-weight="800">5</text>
+      <text x="-4" y="190" fill="#FAFAFA" font-size="22" font-weight="700">结算</text>
+      <text x="-36" y="224" fill="#A1A1AA" font-size="15">受控完成交易</text>
+    </g>
+  </g>
+  <rect x="522" y="508" width="396" height="58" rx="29" fill="#F59E0B" fill-opacity="0.14" stroke="#F59E0B"/>
+  <text x="572" y="545" fill="#F9C979" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="650">市场表达只作为子语言，不成为整体品牌</text>
+</svg>

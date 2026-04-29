@@ -1,0 +1,62 @@
+:root {
+  --tb-blue: #0A84FF;
+  --tb-cyan: #22D3EE;
+  --tb-emerald: #10B981;
+  --tb-coral: #F97366;
+  --tb-amber: #F59E0B;
+  --tb-red: #EF4444;
+
+  --tb-bg: #FFFFFF;
+  --tb-surface: #FAFAFA;
+  --tb-card: #FFFFFF;
+  --tb-hover: #F4F4F5;
+  --tb-border: #E4E4E7;
+  --tb-text: #18181B;
+  --tb-muted: #71717A;
+
+  --tb-radius-sm: 6px;
+  --tb-radius-md: 8px;
+  --tb-radius-lg: 12px;
+  --tb-radius-pill: 999px;
+
+  --tb-space-1: 4px;
+  --tb-space-2: 8px;
+  --tb-space-3: 12px;
+  --tb-space-4: 16px;
+  --tb-space-6: 24px;
+  --tb-space-8: 32px;
+
+  --tb-shadow-card: 0 10px 30px rgb(15 23 32 / 0.08);
+  --tb-shadow-active: 0 0 0 1px rgb(10 132 255 / 0.42), 0 12px 34px rgb(10 132 255 / 0.14);
+}
+
+.dark {
+  --tb-bg: #1C1C1E;
+  --tb-surface: #2C2C2E;
+  --tb-card: #27272A;
+  --tb-hover: #3A3A3C;
+  --tb-border: #3F3F46;
+  --tb-text: #FAFAFA;
+  --tb-muted: #A1A1AA;
+
+  --tb-shadow-card: 0 10px 30px rgb(0 0 0 / 0.28);
+  --tb-shadow-active: 0 0 0 1px rgb(10 132 255 / 0.5), 0 12px 34px rgb(10 132 255 / 0.18);
+}
+
+.tb-flow-line {
+  stroke: var(--tb-cyan);
+  stroke-linecap: round;
+  stroke-width: 2px;
+}
+
+.tb-status-healthy {
+  color: var(--tb-emerald);
+  border-color: color-mix(in srgb, var(--tb-emerald) 42%, transparent);
+  background: color-mix(in srgb, var(--tb-emerald) 12%, transparent);
+}
+
+.tb-status-market {
+  color: var(--tb-amber);
+  border-color: color-mix(in srgb, var(--tb-amber) 42%, transparent);
+  background: color-mix(in srgb, var(--tb-amber) 12%, transparent);
+}

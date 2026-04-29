@@ -1108,6 +1108,10 @@ pub fn run() {
             commands::find_ai_sellers,
             commands::check_cloudflared,
             commands::start_cloudflare_tunnel,
+            commands::clawtip_create_order,
+            commands::clawtip_wait_payment,
+            commands::clawtip_verify_credential,
+            commands::clawtip_call_paid_inference_once,
             commands::open_file_dialog,
 
             commands::open_zip_file_dialog,

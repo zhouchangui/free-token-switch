@@ -1,0 +1,53 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">TokensBuddy 流动控制台标记</title>
+  <desc id="desc">由多个 Token 节点、切换路径和受控流动轨道构成的 TokensBuddy 品牌标记。</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="68%">
+      <stop offset="0%" stop-color="#22314A"/>
+      <stop offset="52%" stop-color="#121820"/>
+      <stop offset="100%" stop-color="#080B10"/>
+    </radialGradient>
+    <linearGradient id="flowA" x1="185" y1="226" x2="822" y2="795" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#22D3EE"/>
+      <stop offset="50%" stop-color="#0A84FF"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="flowB" x1="821" y1="246" x2="174" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F97366"/>
+      <stop offset="45%" stop-color="#0A84FF"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.04 0 0 0 0 0.52 0 0 0 0 1 0 0 0 0.55 0"/>
+      <feBlend in="SourceGraphic" mode="screen"/>
+    </filter>
+    <filter id="nodeShadow" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <circle cx="512" cy="512" r="332" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+  <circle cx="512" cy="512" r="232" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="2"/>
+  <g filter="url(#softGlow)">
+    <path d="M250 376C338 216 575 185 702 312C779 389 791 501 727 584C663 667 530 689 430 640C332 592 286 489 330 403" stroke="url(#flowA)" stroke-width="58" stroke-linecap="round"/>
+    <path d="M774 650C690 814 443 843 318 705C247 626 240 513 308 433C376 353 511 338 607 393C701 447 739 552 690 636" stroke="url(#flowB)" stroke-width="58" stroke-linecap="round"/>
+  </g>
+  <g filter="url(#nodeShadow)">
+    <circle cx="512" cy="512" r="112" fill="#0F1720" stroke="#E6F7FF" stroke-opacity="0.88" stroke-width="20"/>
+    <circle cx="512" cy="512" r="54" fill="#0A84FF"/>
+    <path d="M482 512H542M512 482V542" stroke="white" stroke-width="22" stroke-linecap="round"/>
+  </g>
+  <g filter="url(#nodeShadow)">
+    <circle cx="248" cy="376" r="70" fill="#0F1720" stroke="#22D3EE" stroke-width="18"/>
+    <circle cx="248" cy="376" r="24" fill="#22D3EE"/>
+    <circle cx="776" cy="650" r="70" fill="#0F1720" stroke="#10B981" stroke-width="18"/>
+    <circle cx="776" cy="650" r="24" fill="#10B981"/>
+    <circle cx="774" cy="318" r="62" fill="#0F1720" stroke="#F97366" stroke-width="16"/>
+    <circle cx="774" cy="318" r="22" fill="#F97366"/>
+    <circle cx="318" cy="706" r="62" fill="#0F1720" stroke="#0A84FF" stroke-width="16"/>
+    <circle cx="318" cy="706" r="22" fill="#0A84FF"/>
+  </g>
+  <path d="M674 259L708 311L648 326" stroke="#E6F7FF" stroke-opacity="0.78" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M354 764L316 708L382 694" stroke="#E6F7FF" stroke-opacity="0.78" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

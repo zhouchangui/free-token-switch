@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { invoke } from "@tauri-apps/api/core";
+import { clawtipApi, marketApi } from "@/lib/api";
 import {
   Card,
   CardContent,
@@ -22,6 +22,16 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+interface MarketPaymentListing {
+  provider: string;
+  mode: string;
+  amountFen: number;
+  currency: string;
+  skillSlug: string;
+  indicator: string;
+  payTo: string;
+}
+
 interface MarketListing {
   provider_id: string;
   model_name: string;
@@ -29,46 +39,53 @@ interface MarketListing {
   endpoint: string;
   seller_pubkey: string;
   timestamp: number;
+  status?: "available" | "reserved" | "busy" | "offline";
+  capacity?: number;
+  payment?: MarketPaymentListing | null;
+  resourceUrl?: string;
+  amountFen?: number;
 }
 
 export const MarketPanel = () => {
-  const { t: _t } = useTranslation();
+  const { t } = useTranslation();
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [isSelling, setIsSelling] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [price, setPrice] = useState(10);
   const [tunnelUrl, setTunnelUrl] = useState("");
+  const [purchasePrompt, setPurchasePrompt] = useState("hello");
 
-  // 一键接入 P2P 供应商
-  const connectToSeller = async (seller: MarketListing) => {
+  const purchaseListing = async (seller: MarketListing) => {
+    const payment = seller.payment;
+    const amountFen = payment?.amountFen ?? seller.amountFen;
+    const indicator = payment?.indicator;
+    const payTo = payment?.payTo;
+    const endpoint = seller.resourceUrl || seller.endpoint;
+
+    if (!amountFen || !indicator || !payTo) {
+      toast.error(t("market.purchaseMissingPayment"));
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // 1. 构造供应商配置
-      const p2pProvider = {
-        id: `p2p-${seller.seller_pubkey.slice(0, 8)}`,
-        name: `P2P: ${seller.model_name}`,
-        category: "P2P",
-        settingsConfig: JSON.stringify({
-          endpoint: seller.endpoint,
-          apiKey: "p2p-token-placeholder", // 实际上走 X402 支付，不需要传统 API Key
-          model: seller.model_name,
-        }),
-        icon: "Zap",
-        iconColor: "#f97316", // 品牌橙
-      };
-
-      // 2. 添加到本地数据库 (如果已存在则更新)
-      await invoke("add_provider", { provider: p2pProvider, appId: "claude" });
-
-      // 3. 立即切换
-      await invoke("switch_provider", {
-        providerId: p2pProvider.id,
-        appId: "claude",
+      const order = await clawtipApi.createOrder({
+        listingId: seller.provider_id,
+        prompt: purchasePrompt.trim() || seller.model_name,
+        amountFen,
+        payTo,
+        indicator,
+        endpoint,
       });
 
-      toast.success(`已成功接入 P2P 节点: ${seller.model_name}`);
+      toast.success(
+        t("market.orderCreated", {
+          orderNo: order.orderNo,
+          amount: order.amountFen,
+        }),
+      );
     } catch (error) {
-      toast.error("接入失败: " + error);
+      toast.error(t("market.purchaseFailed", { message: String(error) }));
     } finally {
       setIsLoading(false);
     }
@@ -77,10 +94,10 @@ export const MarketPanel = () => {
   const refreshMarket = async () => {
     setIsLoading(true);
     try {
-      const result = await invoke<MarketListing[]>("find_ai_sellers");
+      const result = await marketApi.findAiSellers();
       setListings(result);
     } catch (error) {
-      toast.error("加载集市失败: " + error);
+      toast.error(t("market.loadFailed", { message: String(error) }));
     } finally {
       setIsLoading(false);
     }
@@ -92,23 +109,24 @@ export const MarketPanel = () => {
       setIsLoading(true);
       try {
         // 1. 穿透内网 (假设本地代理端口为 15721)
-        const url = await invoke<string>("start_cloudflare_tunnel", {
-          port: 15721,
-        });
+        const url = await marketApi.startCloudflareTunnel(15721);
         setTunnelUrl(url);
+        const accessToken = await marketApi.generateSellerAccessToken("claude-pro");
         // 2. 广播公告
-        await invoke("start_selling_tokens", {
-          input: {
-            providerId: "claude-pro",
-            modelName: "claude-3-5-sonnet",
-            price: price,
-            endpoint: url,
-          },
+        await marketApi.startSellingTokens({
+          providerId: "claude-pro",
+          modelName: "claude-3-5-sonnet",
+          pricePer1kTokens: price,
+          endpoint: url,
+          amountFen: price,
+          indicator: "tokens-buddy-claude-pro",
+          payTo: "",
+          accessToken,
         });
         setIsSelling(true);
-        toast.success("您的 AI 节点已上线，正在去中心化网络广播");
+        toast.success(t("market.sellerStarted"));
       } catch (error) {
-        toast.error("启动失败: " + error);
+        toast.error(t("market.sellerStartFailed", { message: String(error) }));
       } finally {
         setIsLoading(false);
       }
@@ -116,7 +134,7 @@ export const MarketPanel = () => {
       // 停止售卖 (实际应在后端关闭进程)
       setIsSelling(false);
       setTunnelUrl("");
-      toast.info("已停止售卖并关闭连接");
+      toast.info(t("market.sellerStopped"));
     }
   };
 
@@ -132,11 +150,9 @@ export const MarketPanel = () => {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Store className="w-5 h-5 text-orange-500" />
-              我要摆摊 (Seller Mode)
+              {t("market.sellerTitle")}
             </CardTitle>
-            <CardDescription>
-              把你不用的 AI 额度卖成闪电网络聪 (Sats)
-            </CardDescription>
+            <CardDescription>{t("market.sellerDescription")}</CardDescription>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -148,7 +164,7 @@ export const MarketPanel = () => {
                 className="w-20 h-8"
               />
               <span className="text-xs text-muted-foreground">
-                Sats / 1k tokens
+                {t("market.pricePerCall")}
               </span>
             </div>
             <Switch
@@ -163,14 +179,14 @@ export const MarketPanel = () => {
             <div className="bg-muted p-3 rounded-lg flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs font-mono">
                 <Globe className="w-3 h-3 text-emerald-500 animate-pulse" />
-                正在公网广播:{" "}
+                {t("market.broadcasting")}{" "}
                 <span className="text-emerald-500">{tunnelUrl}</span>
               </div>
               <Badge
                 variant="outline"
                 className="text-emerald-500 border-emerald-500/30"
               >
-                在线
+                {t("market.online")}
               </Badge>
             </div>
           )}
@@ -181,7 +197,7 @@ export const MarketPanel = () => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <ShoppingCart className="w-5 h-5 text-blue-500" />
-          全球算力广场
+          {t("market.squareTitle")}
         </h3>
         <Button
           variant="ghost"
@@ -192,20 +208,27 @@ export const MarketPanel = () => {
           <RefreshCw
             className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
           />
-          刷新广场
+          {t("market.refresh")}
         </Button>
       </div>
+
+      <Input
+        value={purchasePrompt}
+        onChange={(event) => setPurchasePrompt(event.target.value)}
+        placeholder={t("market.promptPlaceholder")}
+        className="max-w-xl"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {listings.length === 0 ? (
           <div className="col-span-2 py-12 text-center text-muted-foreground border-2 border-dashed rounded-xl">
-            暂时没有节点在售，点击刷新看看。
+            {t("market.empty")}
           </div>
         ) : (
           listings.map((item, idx) => (
             <Card
               key={idx}
-              onClick={() => connectToSeller(item)}
+              onClick={() => purchaseListing(item)}
               className="hover:border-orange-500/50 transition-all cursor-pointer group active:scale-95 transform duration-150"
             >
               <CardContent className="p-4 flex items-center justify-between">
@@ -224,10 +247,13 @@ export const MarketPanel = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-orange-500 font-bold">
-                    {item.price_per_1k_tokens} Sats
+                    {item.payment?.amountFen ??
+                      item.amountFen ??
+                      item.price_per_1k_tokens}{" "}
+                    {t("market.fenPerCall")}
                   </p>
                   <Badge variant="secondary" className="text-[10px] h-4">
-                    接入
+                    {item.status ?? t("market.buy")}
                   </Badge>
                 </div>
               </CardContent>
@@ -239,7 +265,7 @@ export const MarketPanel = () => {
       <div className="flex flex-col gap-2 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-xs text-emerald-600 dark:text-emerald-400">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4" />
-          所有交易通过闪电网络 X402 协议按 Token 实时结算，无需预付，安全匿名。
+          {t("market.clawtipNotice")}
         </div>
         <div className="mt-1 opacity-60 text-[10px] text-center italic">
           Core engine powered by the open-source{" "}

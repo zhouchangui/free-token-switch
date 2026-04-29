@@ -1,5 +1,5 @@
 use crate::services::market::{
-    CloudflaredCheckResult, MarketListing, MarketModelPrice, MarketService,
+    CloudflaredCheckResult, MarketListing, MarketModelPrice, MarketPaymentListing, MarketService,
     SellerPricingSuggestion, SellerRuntimeStatus,
 };
 use crate::store::AppState;
@@ -16,6 +16,10 @@ pub struct StartSellingTokensRequest {
     model_prices: Option<Vec<MarketModelPrice>>,
     price_unit: Option<String>,
     price_version: Option<u32>,
+    amount_fen: Option<i64>,
+    pay_to: Option<String>,
+    indicator: Option<String>,
+    access_token: Option<String>,
 }
 
 #[tauri::command]
@@ -53,11 +57,18 @@ pub async fn start_selling_tokens(
         input.price,
         input.endpoint
     );
+    let amount_fen = input
+        .amount_fen
+        .unwrap_or_else(|| input.price.max(1) as i64);
+    let indicator = input
+        .indicator
+        .unwrap_or_else(|| format!("tokens-buddy-{}", input.provider_id));
+    let pay_to = input.pay_to.unwrap_or_default();
     let listing = MarketListing {
         provider_id: input.provider_id,
         model_name: input.model_name,
         price_per_1k_tokens: input.price,
-        endpoint: input.endpoint,
+        endpoint: input.endpoint.clone(),
         seller_pubkey: "".to_string(), // MarketService will sign it
         timestamp: chrono::Utc::now().timestamp() as u64,
         model_prices: input.model_prices.unwrap_or_default(),
@@ -65,6 +76,21 @@ pub async fn start_selling_tokens(
             .price_unit
             .unwrap_or_else(|| "PER_1M_TOKENS".to_string()),
         price_version: input.price_version.unwrap_or(1),
+        status: crate::services::clawtip::listing::ListingStatus::Available,
+        capacity: 1,
+        streaming: true,
+        payment: Some(MarketPaymentListing {
+            provider: "clawtip".to_string(),
+            mode: "per_call_prepaid".to_string(),
+            amount_fen,
+            currency: "CNY_FEN".to_string(),
+            skill_slug: "tokens-buddy-llm-console".to_string(),
+            indicator,
+            pay_to,
+        }),
+        resource_url: input.endpoint,
+        amount_fen,
+        access_token: input.access_token,
     };
 
     match state.market_service.start_selling(listing).await {
